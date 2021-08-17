@@ -1,0 +1,129 @@
+import React from 'react';
+import { StyleSheet, SafeAreaView, Text, View, Image, TouchableOpacity } from 'react-native';
+import { heightPercentageToDP as hp, widthPercentageToDP as wp } from 'react-native-responsive-screen';
+
+import PageHeading from '../components/PageHeading';
+import CONSTANTS from '../styles/constants';
+import BackgroundImage from '../components/BackgroundImage';
+
+
+export default PaymentSuccess = ({ navigation }) => {
+    return (
+        <SafeAreaView style={styles.screenContainer} >
+            <View>
+                <BackgroundImage />
+                <PageHeading title={"Payment sucessful"} />
+                <View style={styles.paymentDataContainer}>
+                    <Image
+                        source={require('../assets/image/check.gif')}
+                        style={{
+                            backgroundColor:"transparent",
+                            marginTop: hp("3%"),
+                            resizeMode: "contain",
+                            width: wp("20%"),
+                            height: hp("8%")
+                        }}
+                    />
+                    <Text style={{
+                        width: wp("50%"),
+                        marginTop: hp("3%"),
+                        textAlign: "center",
+                        fontSize: wp("4.5%"),
+                        fontWeight: "bold",
+                        color: CONSTANTS.COLOR_DARK_GREY
+                    }}>Your payment has been successful.</Text>
+                    <Text style={{
+                        width: wp("60%"),
+                        marginTop: hp("2%"),
+                        textAlign: "center",
+                        fontSize: wp("3.5%"),
+                        color: "#8D91A2"
+                    }}>We have sent you an email with tickets and invoice</Text>
+                    <TouchableOpacity
+                        activeOpacity={0.5}
+                        onPress={() => navigation.navigate('Home')}
+                    >
+                        <Text style={{
+                            marginTop: hp("3%"),
+                            textAlign: "center",
+                            fontSize: wp("3.5%"),
+                            fontWeight: "bold",
+                            color: "#FF8C41"
+                        }}>BOOK ANOTHER TICKET</Text>
+                    </TouchableOpacity>
+                    <Text style={{
+                        marginTop: hp("10%"),
+                        textAlign: "center",
+                        fontSize: wp("3.2%"),
+                        fontWeight: "500",
+                        color: "#8D91A2"
+                    }}>View your tickets in</Text>
+                    <Text style={{
+                        marginTop: hp(".5%"),
+                        textAlign: "center",
+                        fontSize: wp("3.2%"),
+                        fontWeight: "500",
+                        color: "#FF8C41"
+                    }}>Booked tickets.</Text>
+                </View>
+            </View>
+            <View style={{
+                justifyContent: "center",
+                alignItems: "center"
+            }}>
+                <Image
+                    source={require('../assets/image/QR.png')}
+                    style={{
+                        marginTop: hp("3%"),
+                        resizeMode: "contain",
+                        width: wp("30%"),
+                        height: hp("15%")
+                    }}
+                />
+                <Text style={{
+                    marginTop: hp("1%"),
+                    textAlign: "center",
+                    fontSize: wp("3.2%"),
+                    fontWeight: "bold",
+                    color: "#8D91A2"
+                }}>SHOW THIS QR CODE AT THE ENTERANCE</Text>
+                <Text style={{
+                    marginTop: hp("5%"),
+                    textAlign: "center",
+                    fontSize: wp("3%"),
+                    color: "#8D91A2"
+                }}>OR REMEMBER THE CODE</Text>
+                <Text style={{
+                    marginTop: hp("1%"),
+                    textAlign: "center",
+                    fontSize: wp("3.8%"),
+                    fontWeight: "bold",
+                    color: "#1B1B1B"
+                }}>123456</Text>
+            </View>
+        </SafeAreaView>
+    )
+}
+
+const styles = StyleSheet.create({
+    screenContainer: {
+        flex: 1,
+        backgroundColor: CONSTANTS.COLOR_SCREEN_BACKGROUND
+    },
+    paymentDataContainer: {
+        width: wp("90%"),
+        alignSelf: "center",
+        alignItems: "center",
+        backgroundColor: "#DBFFC5",
+        paddingBottom: hp("2%"),
+        shadowColor: "#979797",
+        shadowOffset: {
+            width: 0,
+            height: 2,
+        },
+        shadowOpacity: 0.21,
+        shadowRadius: 6,
+
+        elevation: 5,
+    }
+})
