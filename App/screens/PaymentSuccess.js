@@ -15,7 +15,7 @@ export default PaymentSuccess = ({ navigation }) => {
                 <PageHeading title={"Payment sucessful"} />
                 <View style={styles.paymentDataContainer}>
                     <Image
-                        source={require('../assets/image/check.gif')}
+                        source={require('../assets/image/success.png')}
                         style={{
                             backgroundColor:"transparent",
                             marginTop: hp("3%"),

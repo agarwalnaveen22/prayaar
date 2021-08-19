@@ -55,14 +55,13 @@ export default BookingDetails = ({ route, navigation }) => {
                                     fontSize: wp("4%")
                                 }}>{temple.people} People</Text>
                             </View>
-                            {temple.amount === 300 && <View>
+                            <View>
                                 <Text style={{
                                     color: "#9A947E",
                                     fontWeight: "400",
                                     fontSize: wp("3.2%")
-                                }}>SARVA DARSHANAM</Text>
+                                }}>{temple.ticketType.toUpperCase()}</Text>
                             </View>
-                            }
                         </View>
 
                         <View style={styles.templeVistingDetails}>

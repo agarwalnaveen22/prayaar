@@ -11,13 +11,27 @@ import Header from '../components/Header.js';
 import ReHashButton from '../components/ReHashButton';
 import CONSTANTS from '../styles/constants';
 
-const amounts = [100, 200, 300]
+const amounts = [
+    {
+        price: 100,
+        text: "Laghu darshan"
+    },
+    {
+        price: 200,
+        text: "Madhya darshan"
+    },
+    {
+        price: 300,
+        text: "Sarva darshan"
+    },
+]
 
 export default Details = ({ route, navigation }) => {
 
     const { temple } = route.params;
 
     const [amount, setAmount] = useState(300)
+    const [ticketType, setTicketType] = useState("Sarva darshan")
     const [people, setPeople] = useState(0)
     const [date, setDate] = useState("")
     const [time, setTime] = useState("")
@@ -173,7 +187,7 @@ export default Details = ({ route, navigation }) => {
 
     const bookTemple = () => {
         if (people > 0 && amount > 0 && date !== "" && time !== "") {
-            navigation.navigate('BookingDetails', { temple: { ...temple, date, time, amount, people } })
+            navigation.navigate('BookingDetails', { temple: { ...temple, date, time, amount, people, ticketType } })
         }
         else {
             showMessage({
@@ -267,19 +281,21 @@ export default Details = ({ route, navigation }) => {
                         <View style={styles.amountsContainer}>
                             {
                                 amounts.map((item) => (
-                                    <View>
+                                    <View style={{
+                                        marginRight: wp("2%")
+                                    }}>
                                         <TouchableOpacity
                                             activeOpacity={0.5}
-                                            onPress={() => setAmount(item)}
-                                            onPress={() => null}
-                                            style={[styles.amountContainer, item === amount ? { backgroundColor: "#FF8A43" } : null]}>
-                                            <Text style={[styles.amountText, item === amount ? { color: CONSTANTS.COLOR_WHITE } : null]}>{`Rs. ${item}`}</Text>
+                                            onPress={() => { setAmount(item.price), setTicketType(item.text) }}
+                                            style={[styles.amountContainer, item.price === amount ? { backgroundColor: "#FF8A43" } : null]}>
+                                            <Text style={[styles.amountText, item.price === amount ? { color: CONSTANTS.COLOR_WHITE } : null]}>{`Rs. ${item.price}`}</Text>
                                         </TouchableOpacity>
-                                        {item === 300 && <Text style={{
+                                        <Text style={{
                                             marginTop: hp(".5%"),
                                             color: "#9C9C9C",
-                                            fontSize: wp("3.5%")
-                                        }}>Sarva dharshanam</Text>}
+                                            fontWeight: "500",
+                                            fontSize: wp("3%")
+                                        }}>{item.text}</Text>
                                     </View>
                                 ))
                             }

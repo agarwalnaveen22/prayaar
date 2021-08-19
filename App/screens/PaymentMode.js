@@ -106,8 +106,7 @@ export default PaymentMode = ({ navigation }) => {
             <View style={styles.buttonContainer}>
                 <ReHashButton
                     selected={true}
-                    onPress={() => null}
-                    // onPress={() => navigation.navigate('PaymentSuccess')}
+                    onPress={() => navigation.navigate('PaymentSuccess')}
                     title={"Confirm Payment"} />
             </View>
         </SafeAreaView>
