@@ -281,21 +281,22 @@ export default Details = ({ route, navigation }) => {
                         <View style={styles.amountsContainer}>
                             {
                                 amounts.map((item) => (
-                                    <View style={{
-                                        marginRight: wp("2%")
-                                    }}>
+                                    <View>
                                         <TouchableOpacity
                                             activeOpacity={0.5}
                                             onPress={() => { setAmount(item.price), setTicketType(item.text) }}
                                             style={[styles.amountContainer, item.price === amount ? { backgroundColor: "#FF8A43" } : null]}>
                                             <Text style={[styles.amountText, item.price === amount ? { color: CONSTANTS.COLOR_WHITE } : null]}>{`Rs. ${item.price}`}</Text>
                                         </TouchableOpacity>
-                                        <Text style={{
-                                            marginTop: hp(".5%"),
-                                            color: "#9C9C9C",
-                                            fontWeight: "500",
-                                            fontSize: wp("3%")
-                                        }}>{item.text}</Text>
+                                        {
+                                            item.price === amount &&
+                                            <Text style={{
+                                                marginTop: hp(".5%"),
+                                                color: "#9C9C9C",
+                                                fontWeight: "500",
+                                                fontSize: wp("3%")
+                                            }}>{item.text}</Text>
+                                        }
                                     </View>
                                 ))
                             }
