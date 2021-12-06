@@ -1,25 +1,59 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { StyleSheet, SafeAreaView, Text, View, Image, Touchable, TouchableOpacity } from 'react-native';
 import { heightPercentageToDP as hp, widthPercentageToDP as wp } from 'react-native-responsive-screen';
+import moment from 'moment';
+import { showMessage } from 'react-native-flash-message';
 
 import PageHeading from '../components/PageHeading';
 import ReHashButton from '../components/ReHashButton';
 import CONSTANTS from '../styles/constants';
 import BackgroundImage from '../components/BackgroundImage';
-import moment from 'moment';
-
+import { bookTicket } from '../services/TempleApi';
+import FullPageLoader from '../components/FullPageLoader';
 
 export default BookingDetails = ({ route, navigation }) => {
-    const { temple } = route.params;
+    const { temple, url, taxVariables } = route.params;
+
+    const [loader, setLoader] = useState(false)
+
+    const makePayment = async () => {
+        setLoader(true)
+        let data = {
+            temple_id: temple?.id,
+            ticket_id: temple?.selectedTicketId,
+            date: moment(temple.date).format("YYYY-MM-DD"),
+            amount: temple?.amount,
+            no_of_tickets: temple?.people,
+            time: moment(temple.time).format("HH:mm:ss"),
+            total_amount: temple?.totaAmount,
+            tax_amount: temple?.tax
+        }
+        await bookTicket(data).then((res) => {
+            if (res.status == 1 || res.status === true) {
+                navigation.navigate('PaymentSuccess')
+            } else {
+                if (res.message) {
+                    showMessage({
+                        message: res?.message,
+                        type: "danger",
+                    })
+                }
+            }
+            setLoader(false)
+        }).catch((ee) => {
+            setLoader(false)
+        })
+    }
 
     return (
         <SafeAreaView style={styles.screenContainer} >
+            <FullPageLoader show={loader} />
             <View>
                 <BackgroundImage />
                 <PageHeading title={"Booking Details"} />
                 <View style={styles.cardContainer}>
                     <Image
-                        source={temple.image}
+                        source={temple?.filename?.length ? { uri: url + temple?.filename[0].uri } : ""}
                         style={styles.fullImageStyle}
                     />
                     <View style={styles.cardTextContainer}>
@@ -31,7 +65,7 @@ export default BookingDetails = ({ route, navigation }) => {
                                     color: CONSTANTS.COLOR_DARK_GREY,
                                     fontWeight: "500",
                                     fontSize: wp("5%")
-                                }}>{temple.name}</Text>
+                                }}>{temple?.name}</Text>
                             </View>
                             <TouchableOpacity
                                 activeOpacity={0.5}
@@ -85,7 +119,7 @@ export default BookingDetails = ({ route, navigation }) => {
                             </View>
                             <View style={styles.labelTextContainer}>
                                 <Text style={styles.label}
-                                >TicketPrice</Text>
+                                >Ticket Price</Text>
                                 <Text style={styles.textStyle}
                                 >Rs.{temple.amount}/Person</Text>
                             </View>
@@ -103,12 +137,12 @@ export default BookingDetails = ({ route, navigation }) => {
                                 fontWeight: "bold",
                                 textAlign: "center",
                                 marginVertical: hp("1%")
-                            }}>Rs. {temple.amount * temple.people}</Text>
+                            }}>Rs. {temple.totaAmount}</Text>
                             <Text style={{
                                 fontSize: wp("3.2"),
                                 color: "#A2A4A6",
                                 textAlign: "center"
-                            }}>SGST (5%) + CGST (5%) = Rs.100 </Text>
+                            }}>{`CGST (${taxVariables?.CGST}%) + CGST (${taxVariables?.SGST}%) = Rs.${temple?.tax}`} </Text>
                         </View>
                     </View>
                 </View>
@@ -116,7 +150,7 @@ export default BookingDetails = ({ route, navigation }) => {
             <View style={styles.buttonContainer}>
                 <ReHashButton
                     selected={true}
-                    onPress={() => navigation.navigate('PaymentMode')}
+                    onPress={() => makePayment()}
                     title={"Make Payment"} />
             </View>
         </SafeAreaView>

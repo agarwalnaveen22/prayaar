@@ -17,7 +17,7 @@ export default PaymentSuccess = ({ navigation }) => {
                     <Image
                         source={require('../assets/image/success.png')}
                         style={{
-                            backgroundColor:"transparent",
+                            backgroundColor: "transparent",
                             marginTop: hp("3%"),
                             resizeMode: "contain",
                             width: wp("20%"),
@@ -41,7 +41,7 @@ export default PaymentSuccess = ({ navigation }) => {
                     }}>We have sent you an email with tickets and invoice</Text>
                     <TouchableOpacity
                         activeOpacity={0.5}
-                        onPress={() => navigation.navigate('Home')}
+                        onPress={() => navigation.navigate('Temples')}
                     >
                         <Text style={{
                             marginTop: hp("3%"),
@@ -58,13 +58,18 @@ export default PaymentSuccess = ({ navigation }) => {
                         fontWeight: "500",
                         color: "#8D91A2"
                     }}>View your tickets in</Text>
-                    <Text style={{
-                        marginTop: hp(".5%"),
-                        textAlign: "center",
-                        fontSize: wp("3.2%"),
-                        fontWeight: "500",
-                        color: "#FF8C41"
-                    }}>Booked tickets.</Text>
+                    <TouchableOpacity
+                        activeOpacity={0.5}
+                        onPress={() => navigation.navigate('BookedTicket')}
+                    >
+                        <Text style={{
+                            marginTop: hp(".5%"),
+                            textAlign: "center",
+                            fontSize: wp("3.2%"),
+                            fontWeight: "500",
+                            color: "#FF8C41"
+                        }}>Booked tickets.</Text>
+                    </TouchableOpacity>
                 </View>
             </View>
             <View style={{

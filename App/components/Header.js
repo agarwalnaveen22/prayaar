@@ -2,12 +2,13 @@ import React, { useState, useEffect } from 'react';
 import { View, StyleSheet, TouchableOpacity } from 'react-native';
 import { heightPercentageToDP as hp, widthPercentageToDP as wp } from 'react-native-responsive-screen';
 import Icon from 'react-native-vector-icons/Ionicons';
+import { useNavigation } from '@react-navigation/native';
 
 import CONSTANTS from '../styles/constants';
 import ReHashTextInput from './ReHashTextInput';
 
 export default Header = ({ searchValue, onSearch }) => {
-
+    const navigation = useNavigation();
     const [search, setSearch] = useState("")
 
     useEffect(() => {
@@ -19,7 +20,7 @@ export default Header = ({ searchValue, onSearch }) => {
             <TouchableOpacity
                 style={styles.headerMenuContainer}
                 activeOpacity={0.5}
-                onPress={() => null}
+                onPress={() => navigation.openDrawer()}
             >
                 <Icon name="menu" color={CONSTANTS.COLOR_DARK_GREY} size={wp("8%")} />
             </TouchableOpacity>

@@ -1,58 +1,72 @@
-import React, { useState } from 'react';
-import { StyleSheet, SafeAreaView, Text, View, FlatList, ScrollView, Image } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { StyleSheet, SafeAreaView, Text, View, FlatList, ScrollView, Image, TouchableOpacity } from 'react-native';
 import { heightPercentageToDP as hp, widthPercentageToDP as wp } from 'react-native-responsive-screen';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view'
+import { showMessage } from 'react-native-flash-message';
 
 import Header from '../components/Header';
 import TempleBlock from '../components/TempleBlock';
 import CONSTANTS from '../styles/constants';
+import FullPageLoader from '../components/FullPageLoader';
+import { getTempleList, getPopularTempleList } from '../services/TempleApi';
 
-const templeList1 = [
-    {
-        id: 1,
-        image: require('../assets/image/Balaji.png'),
-        name: "Balaji Temple",
-        location: "Tirupathi"
-    },
-    {
-        id: 2,
-        image: require('../assets/image/Meenakshi.png'),
-        name: "Meenakshi Temple",
-        location: "Madurai"
-    },
-    {
-        id: 3,
-        image: require('../assets/image/Kukke.jpeg'),
-        name: "Kukke Subramanya",
-        location: "Kukke"
-    }
-]
-
-const templeList2 = [
-    {
-        id: 1,
-        image: require('../assets/image/Kedarnath.jpeg'),
-        name: "Shri Kedarnath Temple (Shiva)",
-        location: "Kedarnath"
-    },
-    {
-        id: 2,
-        image: require('../assets/image/badrinath.jpeg'),
-        name: "Shri Badrinath (Vishnu)",
-        location: "Nadrinath"
-    },
-    {
-        id: 3,
-        image: require('../assets/image/jagannatha.jpeg'),
-        name: "Jagannath Temple",
-        location: "Puri"
-    }
-]
+let temples = []
 
 export default Home = ({ navigation }) => {
 
-    const [allTemples, setAllTemples] = useState(templeList2)
+    const [allTemples, setAllTemples] = useState([])
+    const [allPopularTemples, setAllPopularTemples] = useState([])
+    const [templeImageUrl, setTempleImageUrl] = useState(null)
     const [search, setSearch] = useState(false)
     const [searchValue, setSearchValue] = useState("")
+    const [loader, setLoader] = useState(true)
+
+    useEffect(() => {
+        getPopularTemples()
+        getTemples()
+    }, [])
+
+    const getTemples = async () => {
+        await getTempleList().then((res) => {
+            if (res.status == 1 || res.status === true) {
+                if (res?.message?.length) {
+                    temples = res?.message
+                    setAllTemples(res?.message)
+                }
+                setTempleImageUrl(res?.url)
+            } else {
+                if (res.message) {
+                    showMessage({
+                        message: res?.message,
+                        type: "danger",
+                    })
+                }
+            }
+            setLoader(false)
+        }).catch((ee) => {
+            setLoader(false)
+        })
+    }
+
+    const getPopularTemples = async () => {
+        await getPopularTempleList().then((res) => {
+            if (res.status == 1 || res.status === true) {
+                res?.message?.length && setAllPopularTemples(res?.message)
+                setTempleImageUrl(res?.url)
+            } else {
+                if (res.message) {
+                    showMessage({
+                        message: res?.message,
+                        type: "danger",
+                    })
+                }
+            }
+            setLoader(false)
+        }).catch((ee) => {
+            setLoader(false)
+        })
+    }
 
     const sectionHeader = (title = "") => (
         <View style={styles.sectionHeaderContainer}>
@@ -61,10 +75,10 @@ export default Home = ({ navigation }) => {
     )
 
     const navigateToDetail = (item) => {
-        navigation.navigate('Details', { "temple": item })
+        navigation.navigate('Details', { "temple": item, "url": templeImageUrl })
         setSearchValue("")
         setSearch(false)
-        setAllTemples(templeList2)
+        setAllTemples(temples)
     }
 
     const renderPopularItem = ({ item }) => (
@@ -72,6 +86,7 @@ export default Home = ({ navigation }) => {
             temple={item}
             type={"fixed"}
             onPress={() => navigateToDetail(item)}
+            url={templeImageUrl}
         />
     );
 
@@ -80,6 +95,7 @@ export default Home = ({ navigation }) => {
             temple={item}
             type={"full"}
             onPress={() => navigateToDetail(item)}
+            url={templeImageUrl}
         />
     );
 
@@ -87,13 +103,12 @@ export default Home = ({ navigation }) => {
         if (text.length) {
             setSearchValue(text)
             setSearch(true)
-            let data = [...templeList1, ...templeList2]
-            data = data.filter(item => (item?.name?.toLowerCase()).includes(text.toLowerCase()))
+            data = temples.filter(item => (item?.name?.toLowerCase()).includes(text.toLowerCase()))
             setAllTemples(data)
         } else {
             setSearchValue("")
             setSearch(false)
-            setAllTemples(templeList2)
+            setAllTemples(temples)
         }
     }
 
@@ -112,34 +127,46 @@ export default Home = ({ navigation }) => {
 
     return (
         <SafeAreaView style={styles.screenContainer}>
+            <FullPageLoader show={loader} />
             <Header searchValue={searchValue} onSearch={onSearch} />
-            <ScrollView
-                showsVerticalScrollIndicator={false}
-                style={{
-                    width: "90%",
-                    alignSelf: "center"
-                }}>
-                {
-                    !search && <>
-                        {sectionHeader("Popular temples")}
-                        <FlatList
-                            horizontal
-                            showsHorizontalScrollIndicator={false}
-                            data={templeList1}
-                            renderItem={renderPopularItem}
-                            keyExtractor={item => item.id}
-                        />
-                    </>
-                }
-                {sectionHeader("All temples")}
-                <FlatList
-                    showsHorizontalScrollIndicator={false}
-                    data={allTemples}
-                    renderItem={renderAllItem}
-                    keyExtractor={item => item.id}
-                    ListEmptyComponent={noDataFound()}
-                />
-            </ScrollView>
+            <KeyboardAwareScrollView showsVerticalScrollIndicator={false} style={{ flex: 1 }}>
+                <View
+                    style={{
+                        width: "90%",
+                        alignSelf: "center"
+                    }}>
+                    {
+                        !search && allPopularTemples && allPopularTemples.length ?
+                            <>
+                                {sectionHeader("Popular temples")}
+                                <FlatList
+                                    horizontal
+                                    showsHorizontalScrollIndicator={false}
+                                    data={allPopularTemples}
+                                    renderItem={renderPopularItem}
+                                    keyExtractor={item => item.id}
+                                />
+                            </>
+                            :
+                            null
+                    }
+                    {
+                        allTemples.length ?
+                            <>
+                                {sectionHeader("All temples")}
+                                <FlatList
+                                    showsHorizontalScrollIndicator={false}
+                                    data={allTemples}
+                                    renderItem={renderAllItem}
+                                    keyExtractor={item => item.id}
+                                    ListEmptyComponent={noDataFound()}
+                                />
+                            </>
+                            :
+                            null
+                    }
+                </View>
+            </KeyboardAwareScrollView>
         </SafeAreaView>
     )
 }
@@ -153,7 +180,6 @@ const styles = StyleSheet.create({
         paddingVertical: hp("1.5%")
     },
     sectionHeaderTitle: {
-        fontFamily: "GothamMedium",
         color: CONSTANTS.COLOR_DARK_GREY,
         fontWeight: "500",
         fontSize: wp("4.2%")

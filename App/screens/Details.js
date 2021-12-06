@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { StyleSheet, SafeAreaView, Text, View, Image, TouchableOpacity, Modal, Platform, ScrollView } from 'react-native';
 import { heightPercentageToDP as hp, widthPercentageToDP as wp } from 'react-native-responsive-screen';
 import Icon from 'react-native-vector-icons/FontAwesome';
@@ -10,6 +10,8 @@ import { showMessage } from "react-native-flash-message";
 import Header from '../components/Header.js';
 import ReHashButton from '../components/ReHashButton';
 import CONSTANTS from '../styles/constants';
+import { getTempleTicketList, getSettings } from '../services/TempleApi.js';
+import FullPageLoader from '../components/FullPageLoader.js';
 
 const amounts = [
     {
@@ -28,15 +30,60 @@ const amounts = [
 
 export default Details = ({ route, navigation }) => {
 
-    const { temple } = route.params;
+    const { temple, url } = route.params;
 
-    const [amount, setAmount] = useState(300)
-    const [ticketType, setTicketType] = useState("Sarva darshan")
+    const [tickets, setTickets] = useState([])
+    const [taxVariables, setTaxVariables] = useState(null)
+    const [selectedTicketId, setSelectedTicketId] = useState(null)
+    const [amount, setAmount] = useState(null)
+    const [ticketType, setTicketType] = useState(null)
     const [people, setPeople] = useState(0)
     const [date, setDate] = useState("")
     const [time, setTime] = useState("")
     const [calendarVisible, setCalendarVisible] = useState(false)
     const [timeVisible, setTimeVisible] = useState(false)
+    const [loader, setLoader] = useState(true)
+
+    useEffect(() => {
+        getTickets()
+        getGst()
+    }, [])
+
+    const getTickets = async () => {
+        await getTempleTicketList({ temple_id: temple?.id }).then((res) => {
+            if (res.status == 1 || res.status === true) {
+                res?.message?.length && setTickets(res?.message)
+            } else {
+                if (res.message) {
+                    showMessage({
+                        message: res?.message,
+                        type: "danger",
+                    })
+                }
+            }
+            setLoader(false)
+        }).catch((ee) => {
+            setLoader(false)
+        })
+    }
+
+    const getGst = async () => {
+        await getSettings().then((res) => {
+            if (res.status == 1 || res.status === true) {
+                res?.message && setTaxVariables(res?.message)
+            } else {
+                if (res.message) {
+                    showMessage({
+                        message: res?.message,
+                        type: "danger",
+                    })
+                }
+            }
+            setLoader(false)
+        }).catch((ee) => {
+            setLoader(false)
+        })
+    }
 
     const peopleController = (type) => {
         let no = 0
@@ -187,7 +234,12 @@ export default Details = ({ route, navigation }) => {
 
     const bookTemple = () => {
         if (people > 0 && amount > 0 && date !== "" && time !== "") {
-            navigation.navigate('BookingDetails', { temple: { ...temple, date, time, amount, people, ticketType } })
+            let ticketAmount = amount * people
+            let CGST = taxVariables?.CGST ? ticketAmount * taxVariables?.CGST / 100 : 0
+            let SGST = taxVariables?.SGST ? ticketAmount * taxVariables?.SGST / 100 : 0
+            let tax = CGST + SGST
+            let totaAmount = ticketAmount + tax
+            navigation.navigate('BookingDetails', { temple: { ...temple, date, time, amount, people, ticketType, selectedTicketId, totaAmount, tax }, url: url, taxVariables: taxVariables })
         }
         else {
             showMessage({
@@ -199,13 +251,14 @@ export default Details = ({ route, navigation }) => {
 
     return (
         <SafeAreaView style={styles.screenContainer} >
+            <FullPageLoader show={loader} />
             <Header />
             {showCalendar()}
             {showTime()}
             <ScrollView>
                 <View style={styles.detailContainer}>
                     <Image
-                        source={temple.image}
+                        source={temple?.filename?.length ? { uri: url + temple?.filename[0].uri } : ""}
                         style={styles.fullImageStyle}
                     />
                     <View style={{
@@ -213,12 +266,11 @@ export default Details = ({ route, navigation }) => {
                         paddingHorizontal: wp("3%")
                     }}>
                         <Text style={{
-                            fontFamily: "GothamMedium",
                             color: CONSTANTS.COLOR_DARK_GREY,
                             fontWeight: "500",
                             fontSize: wp("3.6%"),
                         }}>{temple.name}</Text>
-                        <Text style={[styles.labelStyle, { marginTop: hp("0.5%") }]}>{temple.location}, 10am - 5pm</Text>
+                        <Text style={[styles.labelStyle, { marginTop: hp("0.5%") }]}>{temple?.description}, 10am - 5pm</Text>
                         <View style={{
                             flexDirection: "row",
                             justifyContent: "space-between",
@@ -276,31 +328,37 @@ export default Details = ({ route, navigation }) => {
                                 </View>
                             </View>
                         </View>
-
-                        <Text style={[styles.labelStyle, { marginTop: hp("2%") }]}>{temple.location}</Text>
-                        <View style={styles.amountsContainer}>
-                            {
-                                amounts.map((item) => (
-                                    <View>
-                                        <TouchableOpacity
-                                            activeOpacity={0.5}
-                                            onPress={() => { setAmount(item.price), setTicketType(item.text) }}
-                                            style={[styles.amountContainer, item.price === amount ? { backgroundColor: "#FF8A43" } : null]}>
-                                            <Text style={[styles.amountText, item.price === amount ? { color: CONSTANTS.COLOR_WHITE } : null]}>{`Rs. ${item.price}`}</Text>
-                                        </TouchableOpacity>
+                        {
+                            tickets.length ?
+                                <>
+                                    <Text style={[styles.labelStyle, { marginTop: hp("2%") }]}>{temple.name}</Text>
+                                    <View style={styles.amountsContainer}>
                                         {
-                                            item.price === amount &&
-                                            <Text style={{
-                                                marginTop: hp(".5%"),
-                                                color: "#9C9C9C",
-                                                fontWeight: "500",
-                                                fontSize: wp("3%")
-                                            }}>{item.text}</Text>
+                                            tickets.map((item) => (
+                                                <View>
+                                                    <TouchableOpacity
+                                                        activeOpacity={0.5}
+                                                        onPress={() => { setAmount(item.price), setTicketType(item.name), setSelectedTicketId(item?.id) }}
+                                                        style={[styles.amountContainer, item.price === amount ? { backgroundColor: "#FF8A43" } : null]}>
+                                                        <Text style={[styles.amountText, item.price === amount ? { color: CONSTANTS.COLOR_WHITE } : null]}>{`Rs. ${item.price}`}</Text>
+                                                    </TouchableOpacity>
+                                                    {
+                                                        item.price === amount &&
+                                                        <Text style={{
+                                                            marginTop: hp(".5%"),
+                                                            color: "#9C9C9C",
+                                                            fontWeight: "500",
+                                                            fontSize: wp("3%")
+                                                        }}>{item?.name}</Text>
+                                                    }
+                                                </View>
+                                            ))
                                         }
                                     </View>
-                                ))
-                            }
-                        </View>
+                                </>
+                                :
+                                null
+                        }
                         <Text style={[styles.labelStyle, { marginTop: hp("3%") }]}>Total</Text>
                         <Text style={{
                             marginTop: hp(".5%"),
@@ -313,8 +371,18 @@ export default Details = ({ route, navigation }) => {
                 <View style={styles.buttonContainer}>
                     <View style={{ flex: 0.35 }}>
                         <ReHashButton
+                            mode="outline"
                             onPress={() => navigation.goBack()}
-                            title={"Cancel"} />
+                            title={"Cancel"}
+                            contentStyle={{
+                                borderRadius: hp("1%"),
+                                borderWidth: 1,
+                                borderColor: "#C3C3C2"
+                            }}
+                            labelStyle={{
+                                color: "#8D91A2"
+                            }}
+                        />
                     </View>
                     <View style={{ flex: 0.55 }}>
                         <ReHashButton
@@ -351,6 +419,7 @@ const styles = StyleSheet.create({
         elevation: 5,
     },
     fullImageStyle: {
+        backgroundColor: CONSTANTS.COLOR_GREY,
         borderTopLeftRadius: hp("1%"),
         borderTopRightRadius: hp("1%"),
         height: hp("25%"),
