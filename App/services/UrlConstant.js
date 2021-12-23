@@ -8,5 +8,6 @@ export default URL_CONSTANT = {
     TEMPLE_TICKET_LIST: 'user/ticketlist',
     BOOK_TICKET: 'booking/add',
     PROFILE_UPDATE: 'user/profile',
-    BOOKED_TICKED_LIST: 'booking/list'
+    BOOKED_TICKED_LIST: 'booking/list',
+    CONFIRM_PAYMENT: 'booking/payment'
 }

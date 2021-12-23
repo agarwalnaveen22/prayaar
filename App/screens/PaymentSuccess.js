@@ -1,18 +1,33 @@
-import React from 'react';
-import { StyleSheet, SafeAreaView, Text, View, Image, TouchableOpacity } from 'react-native';
+import React, { useEffect } from 'react';
+import { Alert, StyleSheet, SafeAreaView, Text, View, Image, TouchableOpacity, BackHandler } from 'react-native';
 import { heightPercentageToDP as hp, widthPercentageToDP as wp } from 'react-native-responsive-screen';
 
-import PageHeading from '../components/PageHeading';
 import CONSTANTS from '../styles/constants';
 import BackgroundImage from '../components/BackgroundImage';
+import Header from '../components/Header';
 
 
 export default PaymentSuccess = ({ navigation }) => {
+
+    useEffect(() => {
+        const backAction = () => {
+            navigation.navigate('Temples')
+            return true;
+        };
+
+        const backHandler = BackHandler.addEventListener(
+            "hardwareBackPress",
+            backAction
+        );
+
+        return () => backHandler.remove();
+    }, []);
+
     return (
         <SafeAreaView style={styles.screenContainer} >
+            <Header heading={"Payment successful"} />
             <View>
                 <BackgroundImage />
-                <PageHeading title={"Payment sucessful"} />
                 <View style={styles.paymentDataContainer}>
                     <Image
                         source={require('../assets/image/success.png')}
@@ -116,6 +131,7 @@ const styles = StyleSheet.create({
         backgroundColor: CONSTANTS.COLOR_SCREEN_BACKGROUND
     },
     paymentDataContainer: {
+        marginTop: hp("2%"),
         width: wp("90%"),
         alignSelf: "center",
         alignItems: "center",

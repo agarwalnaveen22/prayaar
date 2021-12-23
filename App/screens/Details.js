@@ -53,6 +53,12 @@ export default Details = ({ route, navigation }) => {
         await getTempleTicketList({ temple_id: temple?.id }).then((res) => {
             if (res.status == 1 || res.status === true) {
                 res?.message?.length && setTickets(res?.message)
+                if (res?.message.length === 1) {
+                    let data = res?.message[0]
+                    setAmount(data?.price)
+                    setTicketType(data?.name)
+                    setSelectedTicketId(data?.id)
+                }
             } else {
                 if (res.message) {
                     showMessage({
@@ -252,7 +258,7 @@ export default Details = ({ route, navigation }) => {
     return (
         <SafeAreaView style={styles.screenContainer} >
             <FullPageLoader show={loader} />
-            <Header />
+            <Header heading={"Temple Details"} />
             {showCalendar()}
             {showTime()}
             <ScrollView>
@@ -369,27 +375,38 @@ export default Details = ({ route, navigation }) => {
                     </View>
                 </View>
                 <View style={styles.buttonContainer}>
-                    <View style={{ flex: 0.35 }}>
-                        <ReHashButton
-                            mode="outline"
-                            onPress={() => navigation.goBack()}
-                            title={"Cancel"}
-                            contentStyle={{
-                                borderRadius: hp("1%"),
-                                borderWidth: 1,
-                                borderColor: "#C3C3C2"
-                            }}
-                            labelStyle={{
-                                color: "#8D91A2"
-                            }}
-                        />
-                    </View>
-                    <View style={{ flex: 0.55 }}>
-                        <ReHashButton
-                            selected={true}
-                            onPress={() => bookTemple()}
-                            title={"Book"} />
-                    </View>
+                    {
+                        tickets.length ?
+                            <>
+                                <View style={{ flex: 0.35 }}>
+                                    <ReHashButton
+                                        mode="outline"
+                                        onPress={() => navigation.goBack()}
+                                        title={"Cancel"}
+                                        contentStyle={{
+                                            borderRadius: hp("1%"),
+                                            borderWidth: 1,
+                                            borderColor: "#C3C3C2"
+                                        }}
+                                        labelStyle={{
+                                            color: "#8D91A2"
+                                        }}
+                                    />
+                                </View>
+                                <View style={{ flex: 0.55 }}>
+
+                                    <ReHashButton
+                                        selected={true}
+                                        onPress={() => bookTemple()}
+                                        title={"Book"} />
+
+                                </View>
+                            </>
+                            :
+                            <View style={styles.noTicketContainer}>
+                                <Text style={styles.noTicketText}>No Tickets available</Text>
+                            </View>
+                    }
                 </View>
             </ScrollView>
         </SafeAreaView>
@@ -484,5 +501,15 @@ const styles = StyleSheet.create({
         paddingVertical: hp("1%"),
         paddingHorizontal: wp("4%"),
         marginLeft: wp("3%")
+    },
+    noTicketContainer: {
+        flex: 1,
+        alignItems: "center"
+    },
+    noTicketText: {
+        fontStyle: "italic",
+        fontWeight: "600",
+        fontSize: wp("4%"),
+        color: "#8D91A2"
     }
 })

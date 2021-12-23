@@ -25,6 +25,12 @@ export const bookTicket = async (data) => {
     return resp;
 }
 
+export const confirmPayment = async (data) => {
+    let url = URL_CONSTANT.CONFIRM_PAYMENT;
+    let resp = await post(url, data);
+    return resp;
+}
+
 export const bookedTicketList = async (data) => {
     let url = URL_CONSTANT.BOOKED_TICKED_LIST;
     let resp = await post(url, data);

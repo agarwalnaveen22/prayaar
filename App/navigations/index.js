@@ -1,6 +1,6 @@
 // In App.js in a new project
 
-import * as React from 'react';
+import React, { useRef } from 'react';
 import { View, Text, StyleSheet, useWindowDimensions } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
@@ -14,6 +14,7 @@ import SocialLogin from "../screens/authentication/SocialLogin";
 import SignUp from '../screens/authentication/SignUp';
 import OtpVerify from '../screens/authentication/OtpVerify';
 import AccountVerified from '../screens/authentication/AccountVerified';
+import { isReadyRef, navigationRef } from './navigation_action';
 
 import Home from '../screens/Home';
 import Details from '../screens/Details';
@@ -27,6 +28,12 @@ const Stack = createNativeStackNavigator();
 const Drawer = createDrawerNavigator();
 
 export default Navigation = ({ loggedIn }) => {
+
+    const routeNameRef = useRef();
+    const onReady = () => {
+        routeNameRef.current = navigationRef.current.getCurrentRoute().name;
+        isReadyRef.current = true;
+    };
 
     const authenticationStack = () => {
         return (
@@ -84,7 +91,7 @@ export default Navigation = ({ loggedIn }) => {
                         label="Home"
                         labelStyle={styles.drawerLabelStyle}
                         onPress={() => {
-                            props.navigation.navigate('Home');
+                            props.navigation.navigate('Temples');
                         }}
                     />
                     <DrawerItem
@@ -131,7 +138,9 @@ export default Navigation = ({ loggedIn }) => {
         )
     }
     return (
-        <NavigationContainer>
+        <NavigationContainer
+            ref={navigationRef}
+            onReady={onReady}>
             <Stack.Navigator
                 screenOptions={{
                     headerShown: false

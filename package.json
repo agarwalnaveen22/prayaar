@@ -28,6 +28,7 @@
     "react-native-image-picker": "^4.3.0",
     "react-native-keyboard-aware-scroll-view": "github:APSL/react-native-keyboard-aware-scroll-view#pull/501/head",
     "react-native-paper": "^4.9.2",
+    "react-native-razorpay": "^2.2.8",
     "react-native-reanimated": "^2.2.4",
     "react-native-responsive-screen": "^1.4.2",
     "react-native-safe-area-context": "^3.3.0",

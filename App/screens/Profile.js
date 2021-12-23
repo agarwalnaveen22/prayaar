@@ -14,6 +14,7 @@ import { emailvalidation, phonevalidation } from '../utilities/validation'
 import { showMessage } from 'react-native-flash-message';
 import { profileUpdate } from '../services/TempleApi';
 import FullPageLoader from '../components/FullPageLoader';
+import Header from '../components/Header';
 
 export default Profile = ({ navigation }) => {
     const [loader, setLoader] = useState(false)
@@ -83,9 +84,10 @@ export default Profile = ({ navigation }) => {
     return (
         <SafeAreaView style={styles.screenContainer} >
             <BackgroundView />
+            <Header heading={"Profile"} />
             <FullPageLoader show={loader} />
-            <PageHeading title={"Profile"} />
             <View style={{
+                marginTop: hp("2%"),
                 width: wp("90%"),
                 alignSelf: "center",
                 backgroundColor: "#FFF",
@@ -153,7 +155,7 @@ export default Profile = ({ navigation }) => {
                 <ReHashButton
                     selected={true}
                     onPress={() => saveDetails()}
-                    title={"SAVE"} />
+                    title={"UPDATE"} />
             </View>
         </SafeAreaView>
     )

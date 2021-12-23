@@ -10,6 +10,7 @@ import BackgroundView from '../components/BackgroundView';
 import BookedCard from '../components/BookedCard';
 import FullPageLoader from '../components/FullPageLoader';
 import { bookedTicketList } from '../services/TempleApi';
+import Header from '../components/Header';
 
 export default BookedTicket = ({ navigation }) => {
 
@@ -64,8 +65,8 @@ export default BookedTicket = ({ navigation }) => {
     return (
         <SafeAreaView style={styles.screenContainer} >
             <BackgroundView />
+            <Header heading="Booked Tickets" />
             <FullPageLoader show={loader} />
-            <PageHeading title={"Booked Tickets"} />
             <View style={{
                 width: wp("90%"),
                 alignSelf: "center"

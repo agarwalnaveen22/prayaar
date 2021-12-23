@@ -111,5 +111,11 @@
 		<string>ProductSans-Thin.ttf</string>
 		<string>ProductSans-ThinItalic.ttf</string>
 	</array>
+	<key>LSApplicationQueriesSchemes</key>
+	<array>
+		<string>tez</string>
+		<string>phonepe</string>
+		<string>paytmmp</string>
+	</array>
 </dict>
 </plist>

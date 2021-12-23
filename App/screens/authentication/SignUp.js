@@ -110,6 +110,7 @@ export default SignUp = (props) => {
             let data = {
                 email: email,
                 password: password,
+                app_type: "user"
             }
             setLoader(true)
             await login(data).then(async (res) => {

@@ -22,7 +22,7 @@ export default ReHashButton = (props) => {
     }, []);
     if (showButton) {
         return (
-            <View style={[styles.shadow, { zIndex: 0 }]}>
+            <View style={[props?.mode === "outline" ? null : styles.shadow, { zIndex: 0 }]}>
                 <Button
                     mode={props?.mode ? props?.mode : "contained"}
                     onPress={() => props?.onPress ? props?.onPress() : console.log('Pressed')}

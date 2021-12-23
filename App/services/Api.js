@@ -1,6 +1,7 @@
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { showMessage } from 'react-native-flash-message';
+import { goToScreen } from '../navigations/navigation_action';
 
 let apiCall = axios.create({
     baseURL: 'http://prayaar.tk/api/',
@@ -22,10 +23,27 @@ const setClientToken = async () => {
     }
 };
 
+const signOut = async () => {
+    await AsyncStorage.removeItem('access_token')
+    global.user = null
+    global.access_token = null
+    goToScreen("authenticationStack", {
+        screen: "SignUp",
+        params: {
+            screenType: "login"
+        }
+    })
+}
+
 export const get = async (url, data = {}) => {
     await setClientToken();
     return await apiCall.get(url, { params: data })
         .then((success) => {
+            if (success?.data && success?.data?.error) {
+                if (success?.data?.messages === "Token Expired") {
+                    signOut()
+                }
+            }
             console.log("success", success)
             return success?.data
         })
@@ -43,6 +61,11 @@ export const post = async (url, data = {}) => {
     await setClientToken();
     return await apiCall.post(url, data)
         .then((success) => {
+            if (success?.data && success?.data?.error) {
+                if (success?.data?.messages === "Token Expired") {
+                    signOut()
+                }
+            }
             console.log("success", success)
             return success?.data
         })

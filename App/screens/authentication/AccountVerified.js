@@ -18,6 +18,7 @@ export default AccountVerified = ({ route, navigation }) => {
         let data = {
             email: route?.params?.email,
             password: route?.params?.password,
+            app_type: "user"
         }
         setLoader(true)
         console.log("data",data)

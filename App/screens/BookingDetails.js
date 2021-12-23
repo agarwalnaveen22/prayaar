@@ -1,21 +1,25 @@
 import React, { useState } from 'react';
-import { StyleSheet, SafeAreaView, Text, View, Image, Touchable, TouchableOpacity } from 'react-native';
+import { StyleSheet, SafeAreaView, Text, View, Image, Touchable, TouchableOpacity, Platform } from 'react-native';
 import { heightPercentageToDP as hp, widthPercentageToDP as wp } from 'react-native-responsive-screen';
 import moment from 'moment';
 import { showMessage } from 'react-native-flash-message';
+import RazorpayCheckout from 'react-native-razorpay';
 
 import PageHeading from '../components/PageHeading';
 import ReHashButton from '../components/ReHashButton';
 import CONSTANTS from '../styles/constants';
 import BackgroundImage from '../components/BackgroundImage';
-import { bookTicket } from '../services/TempleApi';
+import { bookTicket, confirmPayment } from '../services/TempleApi';
 import FullPageLoader from '../components/FullPageLoader';
+import Header from '../components/Header';
 
 export default BookingDetails = ({ route, navigation }) => {
     const { temple, url, taxVariables } = route.params;
 
     const [loader, setLoader] = useState(false)
+    const [orderData, setOrderData] = useState(null)
 
+    console.log("orderData", orderData)
     const makePayment = async () => {
         setLoader(true)
         let data = {
@@ -28,29 +32,83 @@ export default BookingDetails = ({ route, navigation }) => {
             total_amount: temple?.totaAmount,
             tax_amount: temple?.tax
         }
-        await bookTicket(data).then((res) => {
-            if (res.status == 1 || res.status === true) {
-                navigation.navigate('PaymentSuccess')
-            } else {
-                if (res.message) {
-                    showMessage({
-                        message: res?.message,
-                        type: "danger",
-                    })
+        if (orderData) {
+            openPayment(orderData, data?.total_amount)
+        } else {
+            await bookTicket(data).then((res) => {
+                if (res.status && res?.result) {
+                    if (res?.result) {
+                        setOrderData(res?.result)
+                    }
+                    openPayment(res?.result, data?.total_amount)
+                } else {
+                    if (res.message) {
+                        showMessage({
+                            message: res?.message,
+                            type: "danger",
+                        })
+                    }
+                    setLoader(false)
                 }
-            }
+            }).catch((ee) => {
+                setLoader(false)
+            })
+        }
+    }
+
+    const openPayment = (orderData, totalAmount) => {
+        let options = {
+            description: 'Credits towards consultation',
+            image: 'https://i.imgur.com/3g7nmJC.png',
+            currency: 'INR',
+            key: 'rzp_test_UhDhfQrg37Q8jI',
+            amount: totalAmount,
+            name: 'Acme Corp',
+            order_id: orderData?.order_id,//Replace this with an order_id created using Orders API.
+            prefill: {
+                email: global.user?.email,
+                contact: global.user?.phone_number,
+                // name: 'Gaurav Kumar'
+            },
+            theme: { color: CONSTANTS.PRIMARY_COLOR }
+        }
+        console.log("option", options)
+        RazorpayCheckout.open(options).then(async (data) => {
+            data.booking_id = orderData?.booking_id
+            console.log("data", data)
+            await confirmPayment(data).then((res) => {
+                if (res.status) {
+                    setLoader(false)
+                    navigation.navigate('PaymentSuccess')
+                } else {
+                    if (res.message) {
+                        showMessage({
+                            message: res?.message,
+                            type: "danger",
+                        })
+                    }
+                    setLoader(false)
+                }
+            }).catch((ee) => {
+                setLoader(false)
+            })
+        }).catch((error) => {
+            // handle failure
+            console.log("error", error)
             setLoader(false)
-        }).catch((ee) => {
-            setLoader(false)
-        })
+            showMessage({
+                message: Platform.OS === "ios" ? error?.description : error?.error?.description,
+                type: "danger",
+            })
+        });
     }
 
     return (
         <SafeAreaView style={styles.screenContainer} >
             <FullPageLoader show={loader} />
-            <View>
+            <Header heading={"Booking Details"} />
+            <View style={{ zIndex: 0 }}>
                 <BackgroundImage />
-                <PageHeading title={"Booking Details"} />
                 <View style={styles.cardContainer}>
                     <Image
                         source={temple?.filename?.length ? { uri: url + temple?.filename[0].uri } : ""}
@@ -94,7 +152,7 @@ export default BookingDetails = ({ route, navigation }) => {
                                     color: "#9A947E",
                                     fontWeight: "400",
                                     fontSize: wp("3.2%")
-                                }}>{temple.ticketType.toUpperCase()}</Text>
+                                }}>{temple?.ticketType?.toUpperCase()}</Text>
                             </View>
                         </View>
 
@@ -163,6 +221,7 @@ const styles = StyleSheet.create({
         backgroundColor: CONSTANTS.COLOR_SCREEN_BACKGROUND
     },
     cardContainer: {
+        marginTop: hp("2%"),
         width: wp("90%"),
         alignSelf: "center",
         backgroundColor: CONSTANTS.COLOR_WHITE,
@@ -228,6 +287,7 @@ const styles = StyleSheet.create({
         textAlign: "center"
     },
     buttonContainer: {
+        zIndex: 0,
         width: wp("80%"),
         alignSelf: "center",
         marginTop: hp("4%")
