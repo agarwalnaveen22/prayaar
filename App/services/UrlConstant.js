@@ -2,6 +2,7 @@ export default URL_CONSTANT = {
     SIGNUP_URL: 'user/add',
     OTP_VERIFY: 'user/verify',
     LOGIN: 'user/auth',
+    SOCIAL_LOGIN: 'user/socialauth',
     USER_SETTINGS: 'user/settings',
     POPULAR_TEMPLE_LIST: 'user/favorite',
     TEMPLE_LIST: 'user/templelist',

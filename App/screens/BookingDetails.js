@@ -12,6 +12,7 @@ import BackgroundImage from '../components/BackgroundImage';
 import { bookTicket, confirmPayment } from '../services/TempleApi';
 import FullPageLoader from '../components/FullPageLoader';
 import Header from '../components/Header';
+import CONFIG from '../config';
 
 export default BookingDetails = ({ route, navigation }) => {
     const { temple, url, taxVariables } = route.params;
@@ -23,6 +24,7 @@ export default BookingDetails = ({ route, navigation }) => {
     const makePayment = async () => {
         setLoader(true)
         let data = {
+            booking_type: 1,
             temple_id: temple?.id,
             ticket_id: temple?.selectedTicketId,
             date: moment(temple.date).format("YYYY-MM-DD"),
@@ -61,7 +63,7 @@ export default BookingDetails = ({ route, navigation }) => {
             description: 'Credits towards consultation',
             image: 'https://i.imgur.com/3g7nmJC.png',
             currency: 'INR',
-            key: 'rzp_test_UhDhfQrg37Q8jI',
+            key: CONFIG.RAZOR_PAY,
             amount: totalAmount,
             name: 'Acme Corp',
             order_id: orderData?.order_id,//Replace this with an order_id created using Orders API.
@@ -79,7 +81,7 @@ export default BookingDetails = ({ route, navigation }) => {
             await confirmPayment(data).then((res) => {
                 if (res.status) {
                     setLoader(false)
-                    navigation.navigate('PaymentSuccess')
+                    navigation.navigate('PaymentSuccess', { type: "book", bookingId: orderData?.booking_id })
                 } else {
                     if (res.message) {
                         showMessage({

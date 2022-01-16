@@ -6,12 +6,18 @@ import CalendarPicker from 'react-native-calendar-picker';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import moment from 'moment';
 import { showMessage } from "react-native-flash-message";
+import RazorpayCheckout from 'react-native-razorpay';
 
 import Header from '../components/Header.js';
 import ReHashButton from '../components/ReHashButton';
 import CONSTANTS from '../styles/constants';
 import { getTempleTicketList, getSettings } from '../services/TempleApi.js';
 import FullPageLoader from '../components/FullPageLoader.js';
+import colors from '../utilities/colors.js';
+import ReHashTextInput from '../components/ReHashTextInput.js';
+import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
+import CONFIG from '../config';
+import { bookTicket, confirmPayment } from '../services/TempleApi';
 
 const amounts = [
     {
@@ -32,6 +38,8 @@ export default Details = ({ route, navigation }) => {
 
     const { temple, url } = route.params;
 
+    const [selectedOption, setSelectedOption] = useState(null)
+    const [donation, setDonation] = useState("")
     const [tickets, setTickets] = useState([])
     const [taxVariables, setTaxVariables] = useState(null)
     const [selectedTicketId, setSelectedTicketId] = useState(null)
@@ -43,6 +51,7 @@ export default Details = ({ route, navigation }) => {
     const [calendarVisible, setCalendarVisible] = useState(false)
     const [timeVisible, setTimeVisible] = useState(false)
     const [loader, setLoader] = useState(true)
+    const [orderData, setOrderData] = useState(null)
 
     useEffect(() => {
         getTickets()
@@ -255,6 +264,246 @@ export default Details = ({ route, navigation }) => {
         }
     }
 
+    const donateTemple = () => {
+        if (donation && donation > 0) {
+            makePayment()
+        } else {
+            showMessage({
+                message: "Donation amount should be greater than 0",
+                type: "danger",
+            });
+        }
+    }
+
+    const makePayment = async () => {
+        setLoader(true)
+        let data = {
+            booking_type: 0,
+            temple_id: temple?.id,
+            ticket_id: 0,
+            date: moment(new Date()).format("YYYY-MM-DD"),
+            amount: donation,
+            no_of_tickets: 0,
+            time: moment(new Date()).format("HH:mm:ss"),
+            total_amount: donation,
+            tax_amount: 0
+        }
+        console.log("dawd", data)
+        if (orderData) {
+            openPayment(orderData, data?.total_amount)
+        } else {
+            await bookTicket(data).then((res) => {
+                if (res.status && res?.result) {
+                    if (res?.result) {
+                        setOrderData(res?.result)
+                    }
+                    openPayment(res?.result, data?.total_amount)
+                } else {
+                    if (res.message) {
+                        showMessage({
+                            message: res?.message,
+                            type: "danger",
+                        })
+                    }
+                    setLoader(false)
+                }
+            }).catch((ee) => {
+                setLoader(false)
+            })
+        }
+    }
+
+    const openPayment = (orderData, totalAmount) => {
+        let options = {
+            description: 'Credits towards consultation',
+            image: 'https://i.imgur.com/3g7nmJC.png',
+            currency: 'INR',
+            key: CONFIG.RAZOR_PAY,
+            amount: totalAmount,
+            name: 'Acme Corp',
+            order_id: orderData?.order_id,//Replace this with an order_id created using Orders API.
+            prefill: {
+                email: global.user?.email,
+                contact: global.user?.phone_number,
+                // name: 'Gaurav Kumar'
+            },
+            theme: { color: CONSTANTS.PRIMARY_COLOR }
+        }
+        console.log("option", options)
+        RazorpayCheckout.open(options).then(async (data) => {
+            data.booking_id = orderData?.booking_id
+            console.log("data", data)
+            await confirmPayment(data).then((res) => {
+                if (res.status) {
+                    setLoader(false)
+                    navigation.navigate('PaymentSuccess', { type: "donate" })
+                } else {
+                    if (res.message) {
+                        showMessage({
+                            message: res?.message,
+                            type: "danger",
+                        })
+                    }
+                    setLoader(false)
+                }
+            }).catch((ee) => {
+                setLoader(false)
+            })
+        }).catch((error) => {
+            // handle failure
+            console.log("error", error)
+            setLoader(false)
+            showMessage({
+                message: Platform.OS === "ios" ? error?.description : error?.error?.description,
+                type: "danger",
+            })
+        });
+    }
+
+    const bookTicketView = () => (
+        <>
+            <View style={{
+                flexDirection: "row",
+                justifyContent: "space-between",
+                marginTop: hp("2%")
+            }}>
+                <View>
+                    <TouchableOpacity
+                        activeOpacity={0.5}
+                        onPress={() => setCalendarVisible(true)}
+                    >
+                        <View style={{ flexDirection: "row", alignItems: "center" }}>
+                            <Icon name="calendar" color={"#B7B7B7"} size={wp("4%")} />
+                            <Text style={[styles.labelStyle, { marginHorizontal: wp("2%") }]}>Select Date</Text>
+                            <Icon name="caret-down" color={"#B7B7B7"} size={wp("5%")} />
+                        </View>
+                        <Text style={styles.selectedTextStyle}>{date ? moment(date).format("DD MMM") : ""}</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                        activeOpacity={0.5}
+                        onPress={() => setTimeVisible(true)}
+                        style={{ marginTop: hp("2%") }}>
+                        <View style={{ flexDirection: "row", alignItems: "center" }}>
+                            <Icon name="clock-o" color={"#B7B7B7"} size={wp("4%")} />
+                            <Text style={[styles.labelStyle, { marginHorizontal: wp("2%") }]}>Select Time</Text>
+                            <Icon name="caret-down" color={"#B7B7B7"} size={wp("5%")} />
+                        </View>
+                        <Text style={styles.selectedTextStyle}>{time ? moment(time).format("hh:mm a") : ""}</Text>
+                    </TouchableOpacity>
+                </View>
+                <View>
+                    <Text style={styles.labelStyle}>Number of people</Text>
+                    <View style={{
+                        flexDirection: "row",
+                        alignItems: "center",
+                        marginTop: hp("1%"),
+                        alignSelf: "flex-end"
+                    }}>
+                        <TouchableOpacity
+                            activeOpacity={people === 0 ? 1 : 0.5}
+                            onPress={() => people === 0 ? null : peopleController("minus")}
+                            style={[styles.peopleController, { backgroundColor: "#D8D8D8" }]}>
+                            <Icon name="minus" color={"#808080"} size={wp("4%")} />
+                        </TouchableOpacity>
+                        <Text style={{
+                            paddingHorizontal: wp("3%"),
+                            fontSize: wp("3.6"),
+                            color: CONSTANTS.COLOR_DARK_GREY
+                        }}>{people}</Text>
+                        <TouchableOpacity
+                            activeOpacity={0.5}
+                            onPress={() => peopleController("add")}
+                            style={[styles.peopleController, { backgroundColor: "#FF8A43" }]}>
+                            <Icon name="plus" color={CONSTANTS.COLOR_WHITE} size={wp("4%")} />
+                        </TouchableOpacity>
+                    </View>
+                </View>
+            </View>
+            {
+                tickets.length ?
+                    <>
+                        <Text style={[styles.labelStyle, { marginTop: hp("2%") }]}>{temple.name}</Text>
+                        <View style={styles.amountsContainer}>
+                            {
+                                tickets.map((item) => (
+                                    <View>
+                                        <TouchableOpacity
+                                            activeOpacity={0.5}
+                                            onPress={() => { setAmount(item.price), setTicketType(item.name), setSelectedTicketId(item?.id) }}
+                                            style={[styles.amountContainer, item.price === amount ? { backgroundColor: "#FF8A43" } : null]}>
+                                            <Text style={[styles.amountText, item.price === amount ? { color: CONSTANTS.COLOR_WHITE } : null]}>{`Rs. ${item.price}`}</Text>
+                                        </TouchableOpacity>
+                                        {
+                                            item.price === amount &&
+                                            <Text style={{
+                                                marginTop: hp(".5%"),
+                                                color: "#9C9C9C",
+                                                fontWeight: "500",
+                                                fontSize: wp("3%")
+                                            }}>{item?.name}</Text>
+                                        }
+                                    </View>
+                                ))
+                            }
+                        </View>
+                    </>
+                    :
+                    null
+            }
+            <Text style={[styles.labelStyle, { marginTop: hp("3%") }]}>Total</Text>
+            <Text style={{
+                marginTop: hp(".5%"),
+                color: CONSTANTS.COLOR_DARK_GREY,
+                fontWeight: "bold",
+                fontSize: wp("4%"),
+            }}>{`Rs ${people ? people * amount : 0}`}</Text>
+        </>
+    )
+
+    const donateView = () => (
+        <>
+            <View style={{
+                flexDirection: "row",
+                justifyContent: "space-between",
+                marginTop: hp("2%")
+            }}>
+                <View>
+                    <TouchableOpacity
+                        activeOpacity={0.5}
+                        onPress={() => setCalendarVisible(true)}
+                    >
+                        <View style={{ flexDirection: "row", alignItems: "center" }}>
+                            <Icon name="calendar" color={"#B7B7B7"} size={wp("4%")} />
+                            <Text style={[styles.labelStyle, { marginHorizontal: wp("2%") }]}>Select Date</Text>
+                            <Icon name="caret-down" color={"#B7B7B7"} size={wp("5%")} />
+                        </View>
+                        <Text style={styles.selectedTextStyle}>{date ? moment(date).format("DD MMM") : ""}</Text>
+                    </TouchableOpacity>
+                </View>
+            </View>
+            <View style={{ marginTop: hp("2%") }}>
+                <Text style={{
+                    color: colors.label,
+                    fontWeight: "bold",
+                    fontSize: 13
+                }}>Donate</Text>
+                <ReHashTextInput
+                    placeholder={"Enter a number to donate"}
+                    value={donation}
+                    onChangeText={(val) => { setDonation(val) }}
+                    keyboardType={"number-pad"}
+                />
+            </View>
+            <Text style={[styles.labelStyle, { marginTop: hp("3%") }]}>Total</Text>
+            <Text style={{
+                marginTop: hp(".5%"),
+                color: CONSTANTS.COLOR_DARK_GREY,
+                fontWeight: "bold",
+                fontSize: wp("4%"),
+            }}>{`Rs ${donation ? donation : 0}`}</Text>
+        </>
+    )
+
     return (
         <SafeAreaView style={styles.screenContainer} >
             <FullPageLoader show={loader} />
@@ -262,7 +511,7 @@ export default Details = ({ route, navigation }) => {
             {showCalendar()}
             {showTime()}
             <ScrollView>
-                <View style={styles.detailContainer}>
+                <KeyboardAwareScrollView style={styles.detailContainer}>
                     <Image
                         source={temple?.filename?.length ? { uri: url + temple?.filename[0].uri } : ""}
                         style={styles.fullImageStyle}
@@ -277,106 +526,55 @@ export default Details = ({ route, navigation }) => {
                             fontSize: wp("3.6%"),
                         }}>{temple.name}</Text>
                         <Text style={[styles.labelStyle, { marginTop: hp("0.5%") }]}>{temple?.description}, 10am - 5pm</Text>
-                        <View style={{
-                            flexDirection: "row",
-                            justifyContent: "space-between",
-                            marginTop: hp("2%")
-                        }}>
-                            <View>
-                                <TouchableOpacity
-                                    activeOpacity={0.5}
-                                    onPress={() => setCalendarVisible(true)}
-                                >
-                                    <View style={{ flexDirection: "row", alignItems: "center" }}>
-                                        <Icon name="calendar" color={"#B7B7B7"} size={wp("4%")} />
-                                        <Text style={[styles.labelStyle, { marginHorizontal: wp("2%") }]}>Select Date</Text>
-                                        <Icon name="caret-down" color={"#B7B7B7"} size={wp("5%")} />
-                                    </View>
-                                    <Text style={styles.selectedTextStyle}>{date ? moment(date).format("DD MMM") : ""}</Text>
-                                </TouchableOpacity>
-                                <TouchableOpacity
-                                    activeOpacity={0.5}
-                                    onPress={() => setTimeVisible(true)}
-                                    style={{ marginTop: hp("2%") }}>
-                                    <View style={{ flexDirection: "row", alignItems: "center" }}>
-                                        <Icon name="clock-o" color={"#B7B7B7"} size={wp("4%")} />
-                                        <Text style={[styles.labelStyle, { marginHorizontal: wp("2%") }]}>Select Time</Text>
-                                        <Icon name="caret-down" color={"#B7B7B7"} size={wp("5%")} />
-                                    </View>
-                                    <Text style={styles.selectedTextStyle}>{time ? moment(time).format("hh:mm a") : ""}</Text>
-                                </TouchableOpacity>
-                            </View>
-                            <View>
-                                <Text style={styles.labelStyle}>Number of people</Text>
-                                <View style={{
-                                    flexDirection: "row",
-                                    alignItems: "center",
-                                    marginTop: hp("1%"),
-                                    alignSelf: "flex-end"
-                                }}>
-                                    <TouchableOpacity
-                                        activeOpacity={people === 0 ? 1 : 0.5}
-                                        onPress={() => people === 0 ? null : peopleController("minus")}
-                                        style={[styles.peopleController, { backgroundColor: "#D8D8D8" }]}>
-                                        <Icon name="minus" color={"#808080"} size={wp("4%")} />
-                                    </TouchableOpacity>
-                                    <Text style={{
-                                        paddingHorizontal: wp("3%"),
-                                        fontSize: wp("3.6"),
-                                        color: CONSTANTS.COLOR_DARK_GREY
-                                    }}>{people}</Text>
-                                    <TouchableOpacity
-                                        activeOpacity={0.5}
-                                        onPress={() => peopleController("add")}
-                                        style={[styles.peopleController, { backgroundColor: "#FF8A43" }]}>
-                                        <Icon name="plus" color={CONSTANTS.COLOR_WHITE} size={wp("4%")} />
-                                    </TouchableOpacity>
+                        {selectedOption === null ? <View style={styles.optionContainer}>
+                            <TouchableOpacity
+                                activeOpacity={0.5}
+                                onPress={() => setSelectedOption("book")}
+                                style={{ alignItems: "center" }}>
+                                <View style={styles.optionImageContainer}>
+                                    <Image
+                                        source={require('../assets/image/ticket_booking.png')}
+                                        resizeMode="center"
+                                        style={{
+                                            width: wp("15%"),
+                                            height: wp("12%")
+                                        }}
+                                    />
                                 </View>
-                            </View>
+                                <Text style={styles.optionText}>Book Tickets</Text>
+                            </TouchableOpacity>
+                            <TouchableOpacity
+                                activeOpacity={0.5}
+                                onPress={() => { setSelectedOption("donate"), setDate(new Date()) }}
+                                style={{ alignItems: "center" }}>
+                                <View style={[
+                                    styles.optionImageContainer,
+                                    {
+                                        borderWidth: 2,
+                                        borderColor: "#FF8A43",
+                                    }]}>
+                                    <Image
+                                        source={require('../assets/image/ruppee.png')}
+                                        resizeMode="center"
+                                        style={{
+                                            width: wp("15%"),
+                                            height: wp("12%")
+                                        }}
+                                    />
+                                </View>
+                                <Text style={styles.optionText}>Donate</Text>
+                            </TouchableOpacity>
                         </View>
-                        {
-                            tickets.length ?
-                                <>
-                                    <Text style={[styles.labelStyle, { marginTop: hp("2%") }]}>{temple.name}</Text>
-                                    <View style={styles.amountsContainer}>
-                                        {
-                                            tickets.map((item) => (
-                                                <View>
-                                                    <TouchableOpacity
-                                                        activeOpacity={0.5}
-                                                        onPress={() => { setAmount(item.price), setTicketType(item.name), setSelectedTicketId(item?.id) }}
-                                                        style={[styles.amountContainer, item.price === amount ? { backgroundColor: "#FF8A43" } : null]}>
-                                                        <Text style={[styles.amountText, item.price === amount ? { color: CONSTANTS.COLOR_WHITE } : null]}>{`Rs. ${item.price}`}</Text>
-                                                    </TouchableOpacity>
-                                                    {
-                                                        item.price === amount &&
-                                                        <Text style={{
-                                                            marginTop: hp(".5%"),
-                                                            color: "#9C9C9C",
-                                                            fontWeight: "500",
-                                                            fontSize: wp("3%")
-                                                        }}>{item?.name}</Text>
-                                                    }
-                                                </View>
-                                            ))
-                                        }
-                                    </View>
-                                </>
-                                :
-                                null
+                            :
+                            null
                         }
-                        <Text style={[styles.labelStyle, { marginTop: hp("3%") }]}>Total</Text>
-                        <Text style={{
-                            marginTop: hp(".5%"),
-                            color: CONSTANTS.COLOR_DARK_GREY,
-                            fontWeight: "bold",
-                            fontSize: wp("4%"),
-                        }}>{`Rs ${people ? people * amount : 0}`}</Text>
+                        {selectedOption === "book" ? bookTicketView() : null}
+                        {selectedOption === "donate" ? donateView() : null}
                     </View>
-                </View>
+                </KeyboardAwareScrollView>
                 <View style={styles.buttonContainer}>
                     {
-                        tickets.length ?
+                        tickets.length || selectedOption === "null" ?
                             <>
                                 <View style={{ flex: 0.35 }}>
                                     <ReHashButton
@@ -393,14 +591,16 @@ export default Details = ({ route, navigation }) => {
                                         }}
                                     />
                                 </View>
-                                <View style={{ flex: 0.55 }}>
-
+                                {selectedOption !== null ? <View style={{ flex: 0.55 }}>
                                     <ReHashButton
                                         selected={true}
-                                        onPress={() => bookTemple()}
-                                        title={"Book"} />
+                                        onPress={() => selectedOption === "donate" ? donateTemple() : bookTemple()}
+                                        title={selectedOption === "donate" ? "Donate" : "Book"} />
 
                                 </View>
+                                    :
+                                    null
+                                }
                             </>
                             :
                             <View style={styles.noTicketContainer}>
@@ -511,5 +711,23 @@ const styles = StyleSheet.create({
         fontWeight: "600",
         fontSize: wp("4%"),
         color: "#8D91A2"
+    },
+    optionContainer: {
+        marginTop: hp("5%"),
+        flexDirection: "row",
+        justifyContent: "space-around"
+    },
+    optionImageContainer: {
+        backgroundColor: "#FFF7D8",
+        width: wp("25%"),
+        height: wp("25%"),
+        borderRadius: wp("15%"),
+        alignItems: "center",
+        justifyContent: "center"
+    },
+    optionText: {
+        marginTop: hp("1%"),
+        color: colors.label,
+        fontSize: 16
     }
 })

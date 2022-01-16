@@ -1,7 +1,14 @@
 PODS:
+  - AppAuth (1.4.0):
+    - AppAuth/Core (= 1.4.0)
+    - AppAuth/ExternalUserAgent (= 1.4.0)
+  - AppAuth/Core (1.4.0)
+  - AppAuth/ExternalUserAgent (1.4.0)
   - boost-for-react-native (1.63.0)
   - CocoaAsyncSocket (7.6.5)
   - DoubleConversion (1.1.6)
+  - FBAEMKit (12.2.1):
+    - FBSDKCoreKit_Basics (= 12.2.1)
   - FBLazyVector (0.64.2)
   - FBReactNativeSpec (0.64.2):
     - RCT-Folly (= 2020.01.13.00)
@@ -10,6 +17,14 @@ PODS:
     - React-Core (= 0.64.2)
     - React-jsi (= 0.64.2)
     - ReactCommon/turbomodule/core (= 0.64.2)
+  - FBSDKCoreKit (12.2.1):
+    - FBAEMKit (= 12.2.1)
+    - FBSDKCoreKit_Basics (= 12.2.1)
+  - FBSDKCoreKit_Basics (12.2.1)
+  - FBSDKLoginKit (12.2.1):
+    - FBSDKCoreKit (= 12.2.1)
+  - FBSDKShareKit (12.2.1):
+    - FBSDKCoreKit (= 12.2.1)
   - Flipper (0.75.1):
     - Flipper-Folly (~> 2.5)
     - Flipper-RSocket (~> 1.3)
@@ -57,6 +72,14 @@ PODS:
     - FlipperKit/Core
     - FlipperKit/FlipperKitNetworkPlugin
   - glog (0.3.5)
+  - GoogleSignIn (6.0.2):
+    - AppAuth (~> 1.4)
+    - GTMAppAuth (~> 1.0)
+    - GTMSessionFetcher/Core (~> 1.1)
+  - GTMAppAuth (1.2.2):
+    - AppAuth/Core (~> 1.4)
+    - GTMSessionFetcher/Core (~> 1.5)
+  - GTMSessionFetcher/Core (1.7.0)
   - libevent (2.1.12)
   - OpenSSL-Universal (1.1.180)
   - razorpay-pod (1.1.16)
@@ -253,12 +276,26 @@ PODS:
     - React-jsi (= 0.64.2)
     - React-perflogger (= 0.64.2)
   - React-jsinspector (0.64.2)
-  - react-native-image-picker (4.4.0):
+  - react-native-fbsdk-next (6.2.0):
+    - React-Core
+    - react-native-fbsdk-next/Core (= 6.2.0)
+    - react-native-fbsdk-next/Login (= 6.2.0)
+    - react-native-fbsdk-next/Share (= 6.2.0)
+  - react-native-fbsdk-next/Core (6.2.0):
+    - FBSDKCoreKit (~> 12.2.1)
+    - React-Core
+  - react-native-fbsdk-next/Login (6.2.0):
+    - FBSDKLoginKit (~> 12.2.1)
+    - React-Core
+  - react-native-fbsdk-next/Share (6.2.0):
+    - FBSDKShareKit (~> 12.2.1)
+    - React-Core
+  - react-native-image-picker (4.3.0):
     - React-Core
   - react-native-razorpay (2.2.8):
     - razorpay-pod
     - React
-  - react-native-safe-area-context (3.3.2):
+  - react-native-safe-area-context (3.3.0):
     - React-Core
   - react-native-splash-screen (3.2.0):
     - React
@@ -326,13 +363,16 @@ PODS:
     - React-cxxreact (= 0.64.2)
     - React-jsi (= 0.64.2)
     - React-perflogger (= 0.64.2)
-  - RNCAsyncStorage (1.15.14):
+  - RNCAsyncStorage (1.15.13):
     - React-Core
   - RNCClipboard (1.5.1):
     - React-Core
   - RNDateTimePicker (3.5.2):
     - React-Core
   - RNGestureHandler (1.10.3):
+    - React-Core
+  - RNGoogleSignin (7.0.4):
+    - GoogleSignIn (~> 6.0.0)
     - React-Core
   - RNReanimated (2.2.4):
     - DoubleConversion
@@ -363,7 +403,7 @@ PODS:
     - React-RCTVibration
     - ReactCommon/turbomodule/core
     - Yoga
-  - RNScreens (3.10.0):
+  - RNScreens (3.5.0):
     - React-Core
     - React-RCTImage
   - RNVectorIcons (8.1.0):
@@ -409,6 +449,7 @@ DEPENDENCIES:
   - React-jsi (from `../node_modules/react-native/ReactCommon/jsi`)
   - React-jsiexecutor (from `../node_modules/react-native/ReactCommon/jsiexecutor`)
   - React-jsinspector (from `../node_modules/react-native/ReactCommon/jsinspector`)
+  - react-native-fbsdk-next (from `../node_modules/react-native-fbsdk-next`)
   - react-native-image-picker (from `../node_modules/react-native-image-picker`)
   - react-native-razorpay (from `../node_modules/react-native-razorpay`)
   - react-native-safe-area-context (from `../node_modules/react-native-safe-area-context`)
@@ -429,6 +470,7 @@ DEPENDENCIES:
   - "RNCClipboard (from `../node_modules/@react-native-community/clipboard`)"
   - "RNDateTimePicker (from `../node_modules/@react-native-community/datetimepicker`)"
   - RNGestureHandler (from `../node_modules/react-native-gesture-handler`)
+  - "RNGoogleSignin (from `../node_modules/@react-native-google-signin/google-signin`)"
   - RNReanimated (from `../node_modules/react-native-reanimated`)
   - RNScreens (from `../node_modules/react-native-screens`)
   - RNVectorIcons (from `../node_modules/react-native-vector-icons`)
@@ -436,8 +478,14 @@ DEPENDENCIES:
 
 SPEC REPOS:
   trunk:
+    - AppAuth
     - boost-for-react-native
     - CocoaAsyncSocket
+    - FBAEMKit
+    - FBSDKCoreKit
+    - FBSDKCoreKit_Basics
+    - FBSDKLoginKit
+    - FBSDKShareKit
     - Flipper
     - Flipper-DoubleConversion
     - Flipper-Folly
@@ -445,6 +493,9 @@ SPEC REPOS:
     - Flipper-PeerTalk
     - Flipper-RSocket
     - FlipperKit
+    - GoogleSignIn
+    - GTMAppAuth
+    - GTMSessionFetcher
     - libevent
     - OpenSSL-Universal
     - razorpay-pod
@@ -481,6 +532,8 @@ EXTERNAL SOURCES:
     :path: "../node_modules/react-native/ReactCommon/jsiexecutor"
   React-jsinspector:
     :path: "../node_modules/react-native/ReactCommon/jsinspector"
+  react-native-fbsdk-next:
+    :path: "../node_modules/react-native-fbsdk-next"
   react-native-image-picker:
     :path: "../node_modules/react-native-image-picker"
   react-native-razorpay:
@@ -521,6 +574,8 @@ EXTERNAL SOURCES:
     :path: "../node_modules/@react-native-community/datetimepicker"
   RNGestureHandler:
     :path: "../node_modules/react-native-gesture-handler"
+  RNGoogleSignin:
+    :path: "../node_modules/@react-native-google-signin/google-signin"
   RNReanimated:
     :path: "../node_modules/react-native-reanimated"
   RNScreens:
@@ -531,11 +586,17 @@ EXTERNAL SOURCES:
     :path: "../node_modules/react-native/ReactCommon/yoga"
 
 SPEC CHECKSUMS:
+  AppAuth: 31bcec809a638d7bd2f86ea8a52bd45f6e81e7c7
   boost-for-react-native: 39c7adb57c4e60d6c5479dd8623128eb5b3f0f2c
   CocoaAsyncSocket: 065fd1e645c7abab64f7a6a2007a48038fdc6a99
   DoubleConversion: cf9b38bf0b2d048436d9a82ad2abe1404f11e7de
+  FBAEMKit: 4cea610d0bc1680572f2aad7b25db7a2f2690d82
   FBLazyVector: e686045572151edef46010a6f819ade377dfeb4b
   FBReactNativeSpec: c032831998862f56f69f2b775a141a0e64e26b05
+  FBSDKCoreKit: 5b1992fe65802ca26be7e68bc4fac5f59fa39908
+  FBSDKCoreKit_Basics: a6a92ca628e05f86f458a4721574c5ddfb058ba3
+  FBSDKLoginKit: 7467b7f988ca4fdf48f12a839bcfce4264752429
+  FBSDKShareKit: 25fe0e2cd0811918e5b5b1603cb3fc580154cc48
   Flipper: d3da1aa199aad94455ae725e9f3aa43f3ec17021
   Flipper-DoubleConversion: 38631e41ef4f9b12861c67d17cb5518d06badc41
   Flipper-Folly: 755929a4f851b2fb2c347d533a23f191b008554c
@@ -544,6 +605,9 @@ SPEC CHECKSUMS:
   Flipper-RSocket: 127954abe8b162fcaf68d2134d34dc2bd7076154
   FlipperKit: 8a20b5c5fcf9436cac58551dc049867247f64b00
   glog: 73c2498ac6884b13ede40eda8228cb1eee9d9d62
+  GoogleSignIn: fd381840dbe7c1137aa6dc30849a5c3e070c034a
+  GTMAppAuth: ad5c2b70b9a8689e1a04033c9369c4915bfcbe89
+  GTMSessionFetcher: 43748f93435c2aa068b1cbe39655aaf600652e91
   libevent: 4049cae6c81cdb3654a443be001fb9bdceff7913
   OpenSSL-Universal: 1aa4f6a6ee7256b83db99ec1ccdaa80d10f9af9b
   razorpay-pod: f1763f8ee8f83152837abe7de1cdfbcd4eb035b9
@@ -558,9 +622,10 @@ SPEC CHECKSUMS:
   React-jsi: 67747b9722f6dab2ffe15b011bcf6b3f2c3f1427
   React-jsiexecutor: 80c46bd381fd06e418e0d4f53672dc1d1945c4c3
   React-jsinspector: cc614ec18a9ca96fd275100c16d74d62ee11f0ae
-  react-native-image-picker: 14910ea6b6a38bd45d1a69cb643b157e6ac142cb
+  react-native-fbsdk-next: 3a9545d174f16ec343e7bcaf12f970fdc82feed2
+  react-native-image-picker: 869530859570f2af86ae57bc48886a5e2367a825
   react-native-razorpay: 6796178680164b4716b9cbdacdda5da98781fb0a
-  react-native-safe-area-context: 584dc04881deb49474363f3be89e4ca0e854c057
+  react-native-safe-area-context: 61c8c484a3a9e7d1fda19f7b1794b35bbfd2262a
   react-native-splash-screen: 200d11d188e2e78cea3ad319964f6142b6384865
   React-perflogger: 25373e382fed75ce768a443822f07098a15ab737
   React-RCTActionSheet: af7796ba49ffe4ca92e7277a5d992d37203f7da5
@@ -574,16 +639,17 @@ SPEC CHECKSUMS:
   React-RCTVibration: 24600e3b1aaa77126989bc58b6747509a1ba14f3
   React-runtimeexecutor: a9904c6d0218fb9f8b19d6dd88607225927668f9
   ReactCommon: 149906e01aa51142707a10665185db879898e966
-  RNCAsyncStorage: ea6b5c280997b2b32a587793163b1f10e580c4f7
+  RNCAsyncStorage: ac55c090d35b880ac47a7807ab797854afc640ae
   RNCClipboard: 41d8d918092ae8e676f18adada19104fa3e68495
   RNDateTimePicker: 7658208086d86d09e1627b5c34ba0cf237c60140
   RNGestureHandler: a479ebd5ed4221a810967000735517df0d2db211
+  RNGoogleSignin: c4381751eefd73c552b923ba347a9bfc6f18771c
   RNReanimated: 024eff8202342abf4b24e11575a16afc441dabfe
-  RNScreens: 03ba504f8c98607ad1f07808e71040e0afa335ec
+  RNScreens: 01ab149b5dd5c27f5ff26741b1d2bdf2cee1af35
   RNVectorIcons: 31cebfcf94e8cf8686eb5303ae0357da64d7a5a4
   Yoga: 575c581c63e0d35c9a83f4b46d01d63abc1100ac
   YogaKit: f782866e155069a2cca2517aafea43200b01fd5a
 
-PODFILE CHECKSUM: 66052b971953adb5dcf908a531bec7a65ad8ecc4
+PODFILE CHECKSUM: 4a128e7f44f2dbabcdfd1f67eb476fb0d5b9c75e
 
 COCOAPODS: 1.11.0.beta.2

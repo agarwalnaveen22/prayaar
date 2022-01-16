@@ -8,6 +8,8 @@ import { createDrawerNavigator, DrawerContentScrollView, DrawerItemList, DrawerI
 import { heightPercentageToDP as hp, widthPercentageToDP as wp } from 'react-native-responsive-screen';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { GoogleSignin } from '@react-native-google-signin/google-signin';
+import { LoginManager } from 'react-native-fbsdk-next';
 
 import CONSTANTS from '../styles/constants';
 import SocialLogin from "../screens/authentication/SocialLogin";
@@ -22,6 +24,7 @@ import BookingDetails from '../screens/BookingDetails';
 import PaymentMode from '../screens/PaymentMode';
 import PaymentSuccess from '../screens/PaymentSuccess';
 import Profile from '../screens/Profile';
+import Help from '../screens/Help';
 import BookedTicket from '../screens/BookedTicket';
 
 const Stack = createNativeStackNavigator();
@@ -62,6 +65,7 @@ export default Navigation = ({ loggedIn }) => {
                 initialRouteName="Home">
                 <Drawer.Screen name="Home" component={appStack} />
                 <Drawer.Screen name="Profile" component={Profile} />
+                <Drawer.Screen name="Help" component={Help} />
                 <Drawer.Screen name="BookedTicket" component={BookedTicket} />
             </Drawer.Navigator>
         )
@@ -69,6 +73,16 @@ export default Navigation = ({ loggedIn }) => {
 
     const signOut = async (props) => {
         await AsyncStorage.removeItem('access_token')
+        try {
+            await GoogleSignin.signOut();
+        } catch (error) {
+            console.error(error);
+        }
+        try {
+            await LoginManager.logOut()
+        } catch (error) {
+            console.error(error);
+        }
         global.user = null
         global.access_token = null
         props?.navigation.replace("authenticationStack")
@@ -108,6 +122,14 @@ export default Navigation = ({ loggedIn }) => {
                         labelStyle={styles.drawerLabelStyle}
                         onPress={() => {
                             props.navigation.navigate('Profile');
+                        }}
+                    />
+                    <DrawerItem
+                        style={{ flex: 1 }}
+                        label="Help"
+                        labelStyle={styles.drawerLabelStyle}
+                        onPress={() => {
+                            props.navigation.navigate('Help');
                         }}
                     />
                     <DrawerItem

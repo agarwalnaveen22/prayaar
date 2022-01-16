@@ -7,7 +7,8 @@ import BackgroundImage from '../components/BackgroundImage';
 import Header from '../components/Header';
 
 
-export default PaymentSuccess = ({ navigation }) => {
+export default PaymentSuccess = ({ route, navigation }) => {
+    const { type, bookingId } = route.params;
 
     useEffect(() => {
         const backAction = () => {
@@ -46,14 +47,14 @@ export default PaymentSuccess = ({ navigation }) => {
                         fontSize: wp("4.5%"),
                         fontWeight: "bold",
                         color: CONSTANTS.COLOR_DARK_GREY
-                    }}>Your payment has been successful.</Text>
+                    }}>{type === "donate" ? 'Your donation has been successful.' : 'Your payment has been successful.'}</Text>
                     <Text style={{
                         width: wp("60%"),
                         marginTop: hp("2%"),
                         textAlign: "center",
                         fontSize: wp("3.5%"),
                         color: "#8D91A2"
-                    }}>We have sent you an email with tickets and invoice</Text>
+                    }}>{type === "donate" ? 'We have sent you an email with the invoice' : 'We have sent you an email with tickets and invoice'}</Text>
                     <TouchableOpacity
                         activeOpacity={0.5}
                         onPress={() => navigation.navigate('Temples')}
@@ -64,7 +65,7 @@ export default PaymentSuccess = ({ navigation }) => {
                             fontSize: wp("3.5%"),
                             fontWeight: "bold",
                             color: "#FF8C41"
-                        }}>BOOK ANOTHER TICKET</Text>
+                        }}>{type === "donate" ? 'DONATE MORE' : 'BOOK ANOTHER TICKET'}</Text>
                     </TouchableOpacity>
                     <Text style={{
                         marginTop: hp("10%"),
@@ -72,7 +73,7 @@ export default PaymentSuccess = ({ navigation }) => {
                         fontSize: wp("3.2%"),
                         fontWeight: "500",
                         color: "#8D91A2"
-                    }}>View your tickets in</Text>
+                    }}>{type === "donate" ? 'View your donation in' : 'View your tickets in'}</Text>
                     <TouchableOpacity
                         activeOpacity={0.5}
                         onPress={() => navigation.navigate('BookedTicket')}
@@ -87,7 +88,7 @@ export default PaymentSuccess = ({ navigation }) => {
                     </TouchableOpacity>
                 </View>
             </View>
-            <View style={{
+            {type === "book" ? <View style={{
                 justifyContent: "center",
                 alignItems: "center"
             }}>
@@ -119,8 +120,10 @@ export default PaymentSuccess = ({ navigation }) => {
                     fontSize: wp("3.8%"),
                     fontWeight: "bold",
                     color: "#1B1B1B"
-                }}>123456</Text>
-            </View>
+                }}>{bookingId}</Text>
+            </View> :
+                null
+            }
         </SafeAreaView>
     )
 }

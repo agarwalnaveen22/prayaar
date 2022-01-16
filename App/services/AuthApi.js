@@ -18,3 +18,9 @@ export const login = async (data) => {
     let resp = await post(url, data);
     return resp;
 }
+
+export const socialLogin = async (data) => {
+    let url = URL_CONSTANT.SOCIAL_LOGIN;
+    let resp = await post(url, data);
+    return resp;
+}
