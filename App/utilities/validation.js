@@ -19,3 +19,10 @@ export const lengthValidation = (text, length) => {
     }
     return false
 }
+
+export const passwordvalidation = (password) => {
+    if (/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[#@$!%*?&])[A-Za-z\d#@$!%*?&]{8,}$/.test(password)) {
+        return true
+    }
+    return false
+}

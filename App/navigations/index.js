@@ -1,7 +1,7 @@
 // In App.js in a new project
 
 import React, { useRef } from 'react';
-import { View, Text, StyleSheet, useWindowDimensions } from 'react-native';
+import { View, Text, StyleSheet, Alert } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createDrawerNavigator, DrawerContentScrollView, DrawerItemList, DrawerItem } from '@react-navigation/drawer';
@@ -10,6 +10,7 @@ import Icon from 'react-native-vector-icons/FontAwesome';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { GoogleSignin } from '@react-native-google-signin/google-signin';
 import { LoginManager } from 'react-native-fbsdk-next';
+import { getVersion } from 'react-native-device-info';
 
 import CONSTANTS from '../styles/constants';
 import SocialLogin from "../screens/authentication/SocialLogin";
@@ -72,20 +73,34 @@ export default Navigation = ({ loggedIn }) => {
     }
 
     const signOut = async (props) => {
-        await AsyncStorage.removeItem('access_token')
-        try {
-            await GoogleSignin.signOut();
-        } catch (error) {
-            console.error(error);
-        }
-        try {
-            await LoginManager.logOut()
-        } catch (error) {
-            console.error(error);
-        }
-        global.user = null
-        global.access_token = null
-        props?.navigation.replace("authenticationStack")
+        Alert.alert(
+            "Signout",
+            "Are you sure you want to signout ?",
+            [
+              {
+                text: "Cancel",
+                onPress: () => console.log("Cancel Pressed"),
+                style: "cancel"
+              },
+              { text: "Yes", onPress: async() => {
+                await AsyncStorage.removeItem('access_token')
+                try {
+                    await GoogleSignin.signOut();
+                } catch (error) {
+                    console.error(error);
+                }
+                try {
+                    await LoginManager.logOut()
+                } catch (error) {
+                    console.error(error);
+                }
+                global.user = null
+                global.access_token = null
+                props?.navigation.replace("authenticationStack")
+              } }
+            ]
+          );
+        
     }
 
     const CustomDrawerContent = (props) => {
@@ -110,7 +125,7 @@ export default Navigation = ({ loggedIn }) => {
                     />
                     <DrawerItem
                         style={{ flex: 1 }}
-                        label="Booked Ticket"
+                        label="Bookings"
                         labelStyle={styles.drawerLabelStyle}
                         onPress={() => {
                             props.navigation.navigate('BookedTicket');
@@ -138,6 +153,9 @@ export default Navigation = ({ loggedIn }) => {
                         labelStyle={styles.drawerLabelStyle}
                         onPress={() => signOut(props)}
                     />
+                </View>
+                <View style={{alignItems:"center", marginTop:"10%"}}>
+                    <Text>{`v ${getVersion()}`}</Text>
                 </View>
             </DrawerContentScrollView>
         );
@@ -167,7 +185,8 @@ export default Navigation = ({ loggedIn }) => {
                 screenOptions={{
                     headerShown: false
                 }}
-                initialRouteName={loggedIn ? "appStack" : "authenticationStack"}
+                // initialRouteName={loggedIn ? "appStack" : "authenticationStack"}
+                initialRouteName={"appStack"}
             >
                 <Stack.Screen name="authenticationStack" component={authenticationStack} />
                 <Stack.Screen name="appStack" component={drawerNavigation} />

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { StyleSheet, SafeAreaView, Text, View, Platform } from 'react-native';
+import { StyleSheet, SafeAreaView, Text, View, Platform, Keyboard } from 'react-native';
 import { heightPercentageToDP as hp, widthPercentageToDP as wp } from 'react-native-responsive-screen';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view'
 import { showMessage } from "react-native-flash-message";
@@ -26,19 +26,19 @@ export default OtpVerify = (props) => {
         }
     }, [otp])
 
-    submitOtp = async () => {
+    submitOtp = async (code) => {
         if (otpValid) {
             let data = {
                 phone_number: props?.route?.params?.phone_number,
-                otp: otp
+                otp: code
             }
             setLoader(true)
             await otpVerify(data).then((res) => {
                 if (res.status == 1 || res.status === true) {
-                    showMessage({
-                        message: "Account verification successfull",
-                        type: "success",
-                    });
+                    // showMessage({
+                    //     message: "Account verification successfull",
+                    //     type: "success",
+                    // });
                     props?.navigation?.replace("AccountVerified", { "email": props?.route?.params?.email, "password": props?.route?.params?.password })
                 } else {
                     if (res.message) {
@@ -66,7 +66,7 @@ export default OtpVerify = (props) => {
             <FullPageLoader show={loader} />
             <View style={styles.screenContainer}>
                 <AuthHeader title={"Login options"} showBack auth />
-                <KeyboardAwareScrollView showsVerticalScrollIndicator={false} style={{ flex: 1 }}>
+                <KeyboardAwareScrollView showsVerticalScrollIndicator={false} style={{ flex: 1, marginLeft:wp("2%") }}>
                     <View style={{
                         height: Platform.OS === "ios" ? hp("73%") : hp("80%"),
                         justifyContent: "space-between",
@@ -76,14 +76,16 @@ export default OtpVerify = (props) => {
                             <Text style={commonStyles.largeHeading}>You will have a more secure account</Text>
                         </View>
                         <View>
-                            <Text style={styles.otpLabel}>Enter the OTP you have recieved through email</Text>
+                            <Text style={styles.otpLabel}>Enter the OTP you have recieved through SMS or Email</Text>
                             <OTPInputView
                                 style={styles.otpContainerStyle}
-                                pinCount={5}
+                                pinCount={6}
                                 code={otp}
                                 onCodeChanged={code => setOtp(code)}
                                 codeInputFieldStyle={styles.otpInputStyle}
                                 onCodeFilled={(code) => {
+                                    Keyboard.dismiss()
+                                    submitOtp(code)
                                     console.log(`Code is ${code}, you are good to go!`)
                                 }}
                                 keyboard={"number-pad"}
@@ -93,7 +95,7 @@ export default OtpVerify = (props) => {
                 </KeyboardAwareScrollView>
                 <AuthFooterComponent
                     buttonTitle={"VERIFY"}
-                    onButtonPress={() => submitOtp()}
+                    onButtonPress={() => submitOtp(otp)}
                 />
             </View>
         </SafeAreaView>

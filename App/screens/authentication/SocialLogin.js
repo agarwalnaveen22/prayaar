@@ -14,10 +14,12 @@ import AuthFooterComponent from '../../components/AuthFooterComponent';
 import { showMessage } from 'react-native-flash-message';
 import FullPageLoader from '../../components/FullPageLoader';
 import { socialLogin } from '../../services/AuthApi';
+import WebViewComponent from '../../components/WebViewComponent';
 
 export default SocialLogin = (props) => {
 
     const [loader, setLoader] = useState(false)
+    const [showTermServices, setShowTermServices] = useState(false)
 
     useEffect(() => {
         Settings.initializeSDK();
@@ -52,10 +54,10 @@ export default SocialLogin = (props) => {
                         await AsyncStorage.setItem('user_data', JSON.stringify(res?.userdata))
                         global.user = res?.userdata
                         global.access_token = res?.token
-                        showMessage({
-                            message: "Suucessfully logged in",
-                            type: "success",
-                        });
+                        // showMessage({
+                        //     message: "Suucessfully logged in",
+                        //     type: "success",
+                        // });
                         props?.navigation?.replace("appStack")
                     } else {
                         try {
@@ -154,10 +156,10 @@ export default SocialLogin = (props) => {
                                 await AsyncStorage.setItem('user_data', JSON.stringify(res?.userdata))
                                 global.user = res?.userdata
                                 global.access_token = res?.token
-                                showMessage({
-                                    message: "Suucessfully logged in",
-                                    type: "success",
-                                });
+                                // showMessage({
+                                //     message: "Suucessfully logged in",
+                                //     type: "success",
+                                // });
                                 props?.navigation?.replace("appStack")
                             } else {
                                 try {
@@ -207,7 +209,7 @@ export default SocialLogin = (props) => {
             <View style={styles.screenContainer}>
                 <View>
                     <Image style={{ width: wp("40%"), height: hp("10%") }} resizeMode={"contain"} source={require('../../assets/image/logo.png')} />
-                    <Text style={commonStyles.largeHeading}>Your temple mangement starts here…</Text>
+                    <Text style={commonStyles.largeHeading}>Your temple visit starts here…</Text>
                 </View>
 
                 <View>
@@ -242,9 +244,11 @@ export default SocialLogin = (props) => {
                         onButtonPress={() => props?.navigation.navigate("SignUp", { screenType: "signup" })}
                         alreadyHaveAccount
                         termOfService
+                        onPressTermService={() => setShowTermServices(true)}
                     />
                 </View>
             </View>
+            <WebViewComponent visible={showTermServices} onClose={() => setShowTermServices(false)}/>
         </SafeAreaView>
     )
 }
@@ -271,8 +275,9 @@ const styles = StyleSheet.create({
         marginBottom: hp("3%")
     },
     socialImageContainer: {
-        width: "25%",
+        width: "18%",
         alignItems: "center",
+        marginLeft:"8%"
     },
     socialImage: {
         width: wp("5%"),
@@ -280,7 +285,7 @@ const styles = StyleSheet.create({
     },
     socialText: {
         fontSize: 14,
-        fontWeight: "500",
+        fontWeight: "bold",
         color: "#3B3B3B",
     }
 })

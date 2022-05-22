@@ -12,7 +12,7 @@ export const commonStyles = StyleSheet.create({
     },
     largeHeading: {
         fontWeight: "bold",
-        fontSize: wp("10%"),
+        fontSize: wp("8%"),
         color: "#434956"
     }
 })

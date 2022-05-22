@@ -1,26 +1,32 @@
-import URL_CONSTANT from "./UrlConstant";
-import { get, post, put } from "./Api";
+import URL_CONSTANT from './UrlConstant';
+import {get, post, put} from './Api';
 
-export const signUp = async (data) => {
-    let url = URL_CONSTANT.SIGNUP_URL;
-    let resp = await post(url, data);
-    return resp;
-}
+export const signUp = async data => {
+  let url = URL_CONSTANT.SIGNUP_URL;
+  let resp = await post(url, data);
+  return resp;
+};
 
-export const otpVerify = async (data) => {
-    let url = URL_CONSTANT.OTP_VERIFY;
-    let resp = await post(url, data);
-    return resp;
-}
+export const otpVerify = async data => {
+  let url = URL_CONSTANT.OTP_VERIFY;
+  let resp = await post(url, data);
+  return resp;
+};
 
-export const login = async (data) => {
-    let url = URL_CONSTANT.LOGIN;
-    let resp = await post(url, data);
-    return resp;
-}
+export const login = async data => {
+  let url = URL_CONSTANT.LOGIN;
+  let resp = await post(url, data);
+  return resp;
+};
 
-export const socialLogin = async (data) => {
-    let url = URL_CONSTANT.SOCIAL_LOGIN;
-    let resp = await post(url, data);
-    return resp;
-}
+export const socialLogin = async data => {
+  let url = URL_CONSTANT.SOCIAL_LOGIN;
+  let resp = await post(url, data);
+  return resp;
+};
+
+export const userProfile = async data => {
+  let url = URL_CONSTANT.USER_PROFILE;
+  let resp = await post(url, data);
+  return resp;
+};

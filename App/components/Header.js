@@ -17,13 +17,13 @@ export default Header = ({ searchValue, heading, onSearch }) => {
 
     return (
         <View style={styles.headerContainer}>
-            <TouchableOpacity
+            {global.access_token !== null && <TouchableOpacity
                 style={styles.headerMenuContainer}
                 activeOpacity={0.5}
                 onPress={() => navigation.openDrawer()}
             >
                 <Icon name="menu" color={CONSTANTS.COLOR_DARK_GREY} size={wp("8%")} />
-            </TouchableOpacity>
+            </TouchableOpacity> }
             <View style={{ flex: 1 }}>
                 {
                     heading ?
@@ -38,6 +38,7 @@ export default Header = ({ searchValue, heading, onSearch }) => {
                                 value: search,
                                 icon: <Icon name="search" color={CONSTANTS.COLOR_GREY} size={wp("6%")} />,
                                 dense: false,
+                                left : true
                             }
                             }
                         />}

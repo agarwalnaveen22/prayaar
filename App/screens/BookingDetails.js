@@ -13,6 +13,7 @@ import { bookTicket, confirmPayment } from '../services/TempleApi';
 import FullPageLoader from '../components/FullPageLoader';
 import Header from '../components/Header';
 import CONFIG from '../config';
+import { checkNetwork } from '../services/Api';
 
 export default BookingDetails = ({ route, navigation }) => {
     const { temple, url, taxVariables } = route.params;
@@ -94,14 +95,23 @@ export default BookingDetails = ({ route, navigation }) => {
             }).catch((ee) => {
                 setLoader(false)
             })
-        }).catch((error) => {
+        }).catch(async(error) => {
             // handle failure
             console.log("error", error)
             setLoader(false)
+            let isNetwork = await checkNetwork()
+            if(isNetwork){
             showMessage({
                 message: Platform.OS === "ios" ? error?.description : error?.error?.description,
                 type: "danger",
             })
+        }
+        else{
+            showMessage({
+                message: "Please connect to internet",
+                type: "danger"
+            })
+        }
         });
     }
 
@@ -123,7 +133,7 @@ export default BookingDetails = ({ route, navigation }) => {
                             }}>
                                 <Text style={{
                                     color: CONSTANTS.COLOR_DARK_GREY,
-                                    fontWeight: "500",
+                                    fontWeight: "bold",
                                     fontSize: wp("5%")
                                 }}>{temple?.name}</Text>
                             </View>
@@ -133,7 +143,7 @@ export default BookingDetails = ({ route, navigation }) => {
                             >
                                 <Text style={{
                                     color: CONSTANTS.COLOR_ORANGE,
-                                    fontWeight: "400",
+                                    fontWeight: "bold",
                                     fontSize: wp("3.2%")
                                 }}>Edit</Text>
                             </TouchableOpacity>
@@ -145,14 +155,14 @@ export default BookingDetails = ({ route, navigation }) => {
                             }}>
                                 <Text style={{
                                     color: CONSTANTS.COLOR_DARK_GREY,
-                                    fontWeight: "500",
+                                    fontWeight: "bold",
                                     fontSize: wp("4%")
                                 }}>{temple.people} People</Text>
                             </View>
                             <View>
                                 <Text style={{
                                     color: "#9A947E",
-                                    fontWeight: "400",
+                                    fontWeight: "bold",
                                     fontSize: wp("3.2%")
                                 }}>{temple?.ticketType?.toUpperCase()}</Text>
                             </View>

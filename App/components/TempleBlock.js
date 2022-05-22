@@ -19,7 +19,7 @@ export default TempleBlock = ({ temple, type, onPress, url }) => {
                     style={styles.headingText}>{temple?.name}</Text>
                 <Text
                     numberOfLines={1}
-                    style={styles.subHeadingText}>{temple?.description}</Text>
+                    style={styles.subHeadingText}>{temple?.Address}</Text>
             </View>
         </TouchableOpacity>
     )
