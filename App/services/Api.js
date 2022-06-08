@@ -75,7 +75,7 @@ export const get = async (url, data = {}) => {
       });
   } else {
     showMessage({
-      message: 'Please connect to internet',
+      message: 'Please connect to the internet',
       type: 'danger',
     });
     return false;
@@ -106,7 +106,7 @@ export const post = async (url, data = {}) => {
       });
   } else {
     showMessage({
-      message: 'Please connect to internet',
+      message: 'Please connect to the internet',
       type: 'danger',
     });
     return false;

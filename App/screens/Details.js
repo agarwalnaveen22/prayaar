@@ -473,13 +473,21 @@ export default Details = ({route, navigation}) => {
         // handle failure
         console.log('error', error);
         setLoader(false);
-        showMessage({
-          message:
-            Platform.OS === 'ios'
-              ? error?.description
-              : error?.error?.description,
-          type: 'danger',
-        });
+        if (Platform.OS === 'ios') {
+          showMessage({
+            message: error?.description,
+            type: 'danger',
+          });
+        } else {
+          let msg = error?.error?.description;
+          if (error?.error?.reason === 'payment_cancelled') {
+            msg = 'Oops!! You have cancelled the payment, Please try again.';
+          }
+          showMessage({
+            message: msg,
+            type: 'danger',
+          });
+        }
       });
   };
 
@@ -490,7 +498,7 @@ export default Details = ({route, navigation}) => {
         setSelectedOption(type);
       } else {
         showMessage({
-          message: 'Please connect to internet',
+          message: 'Please connect to the internet',
           type: 'danger',
         });
       }
@@ -630,14 +638,37 @@ export default Details = ({route, navigation}) => {
           </View>
         </>
       ) : null}
-      <Text style={[styles.labelStyle, {marginTop: hp('3%')}]}>Total</Text>
-      <Text
+      <View
         style={{
-          marginTop: hp('.5%'),
-          color: CONSTANTS.COLOR_DARK_GREY,
-          fontWeight: 'bold',
-          fontSize: wp('4%'),
-        }}>{`Rs. ${people ? people * amount : 0}`}</Text>
+          flexDirection: 'row',
+          justifyContent: 'space-between',
+        }}>
+        <View>
+          <Text style={[styles.labelStyle, {marginTop: hp('3%')}]}>Total</Text>
+          <Text
+            style={{
+              marginTop: hp('.5%'),
+              color: CONSTANTS.COLOR_DARK_GREY,
+              fontWeight: 'bold',
+              fontSize: wp('4%'),
+            }}>{`Rs. ${people ? people * amount : 0}`}</Text>
+        </View>
+        <View>
+          <Text style={[styles.labelStyle, {marginTop: hp('3%')}]}>
+            Number of Tickets
+          </Text>
+          <Text
+            style={{
+              marginTop: hp('.5%'),
+              color: CONSTANTS.COLOR_DARK_GREY,
+              fontWeight: 'bold',
+              fontSize: wp('4%'),
+              alignSelf: 'flex-end',
+            }}>
+            {noOfTickets}
+          </Text>
+        </View>
+      </View>
     </>
   );
 
@@ -701,7 +732,7 @@ export default Details = ({route, navigation}) => {
       selectedOption === 'donate' ? donateTemple() : bookTemple();
     } else {
       showMessage({
-        message: 'Please connect to internet',
+        message: 'Please connect to the internet',
         type: 'danger',
       });
       return;

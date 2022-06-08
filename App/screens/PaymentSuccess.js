@@ -99,24 +99,24 @@ export default PaymentSuccess = ({route, navigation}) => {
               fontWeight: '500',
               color: '#8D91A2',
             }}>
-            {type === 'donate'
-              ? 'View your donation in'
-              : 'View your tickets in'}
+            {type === 'donate' ? '' : 'View your tickets in'}
           </Text>
-          <TouchableOpacity
-            activeOpacity={0.5}
-            onPress={() => navigation.navigate('BookedTicket')}>
-            <Text
-              style={{
-                marginTop: hp('.5%'),
-                textAlign: 'center',
-                fontSize: wp('3.2%'),
-                fontWeight: '500',
-                color: '#FF8C41',
-              }}>
-              Booked tickets.
-            </Text>
-          </TouchableOpacity>
+          {type !== 'donate' ? (
+            <TouchableOpacity
+              activeOpacity={0.5}
+              onPress={() => navigation.navigate('BookedTicket')}>
+              <Text
+                style={{
+                  marginTop: hp('.5%'),
+                  textAlign: 'center',
+                  fontSize: wp('3.2%'),
+                  fontWeight: '500',
+                  color: '#FF8C41',
+                }}>
+                Booked tickets.
+              </Text>
+            </TouchableOpacity>
+          ) : null}
         </View>
       </View>
       {type === 'book' ? (
