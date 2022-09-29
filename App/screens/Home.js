@@ -164,10 +164,10 @@ export default Home = ({navigation}) => {
   const noDataFound = () => (
     <View style={{alignItems: 'center', flex: 1, marginTop: hp('5%')}}>
       <Image
-        source={require('../assets/image/temple_no_image.png')}
+        source={require('../assets/image/temple_no_image.jpeg')}
         style={{
           width: wp('50%'),
-          height: hp('20%'),
+          height: hp('30%'),
         }}
       />
       <Text
